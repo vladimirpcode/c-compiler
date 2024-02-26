@@ -3,25 +3,105 @@
 #include <string>
 #include <fstream>
 #include "scan_wrapper.h"
+#include <variant>
 
-enum class Lex{
-    Ident,
-    IntNumber,
-    FloatNumber,
-};
+enum class Lex;
 
 class Scanner{
 public:
     Lex lex;
-    std::string name;
-    int int_value;
-    float float_value;
-
-    Scanner(const std::string& file_name);
+    std::variant<std::string, char, int, float> value;
+    Scanner(const std::string& program_text);
     ~Scanner();
     Lex get_next();
-    void ident();
-    void number();
 private:
     ScanWrapper* wrap;
+    void check(char c);
+    void ident();
+    void number();
+    void char_literal();
+    void string_literal();
+    char backslash_symbol();
+};
+
+class BadLexException : public std::exception{
+public:
+    BadLexException(const std::string& msg) : m_msg(msg){}
+
+    virtual const char* what() const noexcept override{
+        return m_msg.c_str();
+    }
+protected:
+    const std::string m_msg;
+};
+
+class ExpectedLexException : public BadLexException{
+public:
+    ExpectedLexException(const std::string& expected_msg, const std::string line, size_t line_number, size_t char_pos) 
+        : BadLexException(expected_msg),
+        m_line(line),
+        m_line_number(line_number),
+        m_char_pos(char_pos){}
+
+    virtual const char* what() const noexcept override{
+        using namespace std::string_literals;
+        std::string msg = "в строке "s + std::to_string(m_line_number) + ":\n"s;
+        msg += m_line;
+        for (size_t i = 2; i <= m_char_pos; ++i){
+            msg += " "s;
+        }
+        msg += "^";
+        return msg.c_str();
+    }
+private:
+    const std::string m_line;
+    const size_t m_line_number;
+    const size_t m_char_pos;
+};
+
+enum class Lex{
+    EOT, // конец текста
+    String,
+    Char,
+    Ident,
+
+    IntNumber,
+    FloatNumber,
+
+    Comma, // ,
+    Dot, // .
+
+    Assigment,  // =
+    AssigmentMultiply, // *=
+    AssigmentDivide, // /=
+    AssigmentMod, // %=
+    AssigmentPlus, // +=
+    AssigmentMinus, // -=
+    AssigmentLeftShift, // <<=
+    AssigmentRightShift, // >>=
+    AssigmentAnd, // &=
+    AssigmentXor, // ^=
+    AssigmentOr, // |=
+
+    And, // &
+    Asterisk, // *
+    Plus,
+    Minus,
+    Tilde, // ~
+    Exclamation, // !
+
+    LBrace, // (
+    RBrace, // )
+    LCurlyBrace, // {
+    RCurlyBrace, // }
+    LSquareBrace, // [
+    RSquareBrace, // ]
+    Slash, // /
+    GreaterThen, // >
+    LessThen, // <
+    //QuotationMark, // '
+    //DoubleQuotationMark, // "
+    Colon, // :
+    SemiColon, // ;
+
 };
