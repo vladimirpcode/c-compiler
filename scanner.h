@@ -104,4 +104,25 @@ enum class Lex{
     Colon, // :
     SemiColon, // ;
 
+    PrimitiveType, // int, float, etc...
+    TypeSpecifier, // auto, static, etc...
+    StructOrUnion, // struct | union
+    TypeQualifier, // const | volatile
+    Sizeof,
+    Enum,
+    While,
+    For,
+    Do,
+    LabeledStatement, //case | default
+    If,
+    Switch,
+    Goto,
+    Return,
+    Break,
+    Continue,
+
+    Increment, // ++
+    Decrement, // --
 };
+
+std::string to_string(Lex lex);

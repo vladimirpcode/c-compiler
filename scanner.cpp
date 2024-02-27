@@ -22,6 +22,20 @@ Lex Scanner::get_next(){
         char_literal();
     } else if (wrap->ch == '\"'){
         string_literal();
+    } else if (wrap->ch == '+'){
+        lex = Lex::Plus;
+        wrap->get_next();
+        if (wrap->ch == '+'){
+            lex = Lex::Increment;
+            wrap->get_next();
+        }
+    } else if (wrap->ch == '-'){
+        lex = Lex::Minus;
+        wrap->get_next();
+        if (wrap->ch == '-'){
+            lex = Lex::Decrement;
+            wrap->get_next();
+        }
     } else{
         switch (wrap->ch){
             case ScanWrapper::EOT:
@@ -47,12 +61,6 @@ Lex Scanner::get_next(){
                 break;
             case '=':
                 lex = Lex::Assigment;
-                break;
-            case '+':
-                lex = Lex::Plus;
-                break;
-            case '-':
-                lex = Lex::Minus;
                 break;
             case '/':
                 lex = Lex::Slash;
@@ -98,6 +106,7 @@ void Scanner::check(char c){
 
 // первый символ уже буква
 void Scanner::ident(){
+    using namespace std::string_literals;
     lex = Lex::Ident;
     std::string str_value = std::string("");
     while (ScanWrapper::is_alpha(wrap->ch)){
@@ -105,6 +114,45 @@ void Scanner::ident(){
         wrap->get_next();
     }
     value = str_value;
+    if (str_value == "void"s || str_value == "char"s
+        || str_value == "short"s || str_value == "int"s
+        || str_value == "long"s || str_value == "float"s
+        || str_value == "double"s || str_value == "signed"s
+        || str_value == "unsigned"s){
+        lex = Lex::PrimitiveType;
+    } else if (str_value == "auto"s || str_value == "register"s
+        || str_value == "static"s || str_value == "extern"s
+        || str_value == "typedef"){
+        lex = Lex::TypeSpecifier;
+    } else if (str_value == "struct"s || str_value == "union"s){
+        lex = Lex::StructOrUnion;
+    } else if (str_value == "const"s || str_value == "volatile"s){
+        lex = Lex::TypeQualifier;
+    } else if (str_value == "sizeof"s){
+        lex = Lex::Sizeof;
+    } else if (str_value == "enum"s){
+        lex = Lex::Enum;
+    } else if (str_value == "do"s){
+        lex = Lex::Do;
+    } else if (str_value == "while"s){
+        lex = Lex::While;
+    } else if (str_value == "for"s){
+        lex = Lex::For;
+    } else if (str_value == "case"s || str_value == "default"s){
+        lex = Lex::LabeledStatement;
+    } else if (str_value == "if"s){
+        lex = Lex::If;
+    } else if (str_value == "switch"s){
+        lex = Lex::Switch;
+    } else if (str_value == "goto"s){
+        lex = Lex::Goto;
+    } else if (str_value == "return"s){
+        lex = Lex::Return;
+    } else if (str_value == "break"s){
+        lex = Lex::Break;
+    } else if (str_value == "continue"s){
+        lex = Lex::Continue;
+    } 
 }
 
 // первый символ уже цифра
@@ -182,4 +230,63 @@ char Scanner::backslash_symbol(){
     }
     wrap->get_next();
     return result;
+}
+
+
+std::string to_string(Lex lex){
+    using namespace std::string_literals;
+    switch (lex){
+        case Lex::EOT: return "конец текста"s;
+        case Lex::String: return "строковый литерал"s;
+        case Lex::Char: return "символьный литерал"s;
+        case Lex::Ident: return "идентификатор или ключевое слово"s;
+        case Lex::IntNumber: return "целое число"s;
+        case Lex::FloatNumber: return "число с плавающей точки"s;
+        case Lex::Comma: return ","s;
+        case Lex::Dot: return "."s;
+        case Lex::Assigment: return "="s;
+        case Lex::AssigmentMultiply: return "*="s;
+        case Lex::AssigmentDivide: return "/="s;
+        case Lex::AssigmentMod: return "%="s;
+        case Lex::AssigmentPlus: return "+="s;
+        case Lex::AssigmentMinus: return "-="s;
+        case Lex::AssigmentLeftShift: return "<<="s;
+        case Lex::AssigmentRightShift: return ">>="s;
+        case Lex::AssigmentAnd: return "&="s;
+        case Lex::AssigmentXor: return "^="s;
+        case Lex::AssigmentOr: return "|="s;
+        case Lex::And: return "&"s;
+        case Lex::Asterisk: return "*"s;
+        case Lex::Plus: return "+"s;
+        case Lex::Minus: return "-"s;
+        case Lex::Tilde: return "~"s;
+        case Lex::Exclamation: return "!"s;
+        case Lex::LBrace: return "("s;
+        case Lex::RBrace: return ")"s;
+        case Lex::LCurlyBrace: return "{"s;
+        case Lex::RCurlyBrace: return "}"s;
+        case Lex::LSquareBrace: return "["s;
+        case Lex::RSquareBrace: return "]"s;
+        case Lex::Slash: return "/"s;
+        case Lex::GreaterThen: return ">"s;
+        case Lex::LessThen: return "<"s;
+        case Lex::Colon: return ":"s;
+        case Lex::SemiColon: return ";"s;
+        case Lex::PrimitiveType: return "примитивный тип"s;
+        case Lex::TypeSpecifier: return "спецификатор типа"s;
+        case Lex::StructOrUnion: return "struct или union"s;
+        case Lex::TypeQualifier: return "квалификатор типа"s;
+        case Lex::Sizeof: return "sizeof"s;
+        case Lex::Do: return "do"s;
+        case Lex::While: return "while"s;
+        case Lex::For: return "for"s;
+        case Lex::LabeledStatement: return "case | default"s;
+        case Lex::If: return "if"s;
+        case Lex::Switch: return "switch"s;
+        case Lex::Goto: return "goto"s;
+        case Lex::Return: return "return"s; 
+        case Lex::Break: return "break"s;
+        case Lex::Continue: return "continue"s; 
+    }
+    return "unknown"s;
 }
