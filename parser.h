@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <scanner.h>
 
 void parse(const std::string& translation_unit_text);
 
@@ -14,4 +15,12 @@ public:
     }
 protected:
     const std::string m_msg;
+};
+
+class Tree{
+public:
+    Tree *left;
+    Tree *right;
+    Lex operation_or_value_type;
+    LexerValue value;
 };

@@ -7,10 +7,12 @@
 
 enum class Lex;
 
+using LexerValue = std::variant<std::string, char, int, float>;
+
 class Scanner{
 public:
     Lex lex;
-    std::variant<std::string, char, int, float> value;
+    LexerValue value;
     Scanner(const std::string& program_text);
     ~Scanner();
     Lex get_next();

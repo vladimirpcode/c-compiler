@@ -311,6 +311,11 @@ void parse(const std::string& translation_unit_text){
 
     } else {
         // глобальная переменная
+        if (scan.lex == Lex::Assigment){
+            scan.get_next();
+            parse_expression(scan);
+        }
+        check(scan, Lex::SemiColon);
     }
 
 }
