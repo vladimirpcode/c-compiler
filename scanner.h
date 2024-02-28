@@ -22,6 +22,8 @@ private:
     void char_literal();
     void string_literal();
     char backslash_symbol();
+    void skip_whitespace_CLRF();
+    void skip_comments();
 };
 
 class BadLexException : public std::exception{
@@ -83,12 +85,23 @@ enum class Lex{
     AssigmentXor, // ^=
     AssigmentOr, // |=
 
+    Compare, // ==
+    CompareNegative, // !=
+
     And, // &
     Asterisk, // *
     Plus,
     Minus,
     Tilde, // ~
     Exclamation, // !
+    QuestionMark, // ?
+    Xor,    // ^
+    BitwiseAnd, // &
+    BitwiseOr,  // |
+    LogicalAnd, // &&
+    LogicalOr,  // ||
+    LeftShift, // <<
+    RightShift, // >>
 
     LBrace, // (
     RBrace, // )
@@ -97,12 +110,16 @@ enum class Lex{
     LSquareBrace, // [
     RSquareBrace, // ]
     Slash, // /
+    Mod, // %
     GreaterThen, // >
     LessThen, // <
+    GreaterEqualThen, // >=
+    LessEqualThen, // <=
     //QuotationMark, // '
     //DoubleQuotationMark, // "
     Colon, // :
     SemiColon, // ;
+    Arrow, // ->
 
     PrimitiveType, // int, float, etc...
     TypeSpecifier, // auto, static, etc...

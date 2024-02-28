@@ -26,6 +26,14 @@ char ScanWrapper::get_next(){
     return ch;
 }
 
+char ScanWrapper::previous(){
+    if (index == 1u){
+        return ch;
+    }
+    ch = data[index-2u];
+    index--;
+    return ch;
+}
 
 void ScanWrapper::skip_whitespace(){
     while (is_whitespace(ch)){

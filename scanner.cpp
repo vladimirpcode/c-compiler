@@ -14,6 +14,10 @@ Scanner::~Scanner(){
 }
 
 Lex Scanner::get_next(){
+    skip_whitespace_CLRF();
+    skip_comments();
+    skip_whitespace_CLRF();
+    
     if (ScanWrapper::is_alpha(wrap->ch)){
         ident();
     } else if (ScanWrapper::is_number(wrap->ch)){
@@ -34,6 +38,58 @@ Lex Scanner::get_next(){
         wrap->get_next();
         if (wrap->ch == '-'){
             lex = Lex::Decrement;
+            wrap->get_next();
+        } else if (wrap->ch == '>'){
+            lex = Lex::Arrow;
+            wrap->get_next();
+        }
+    } else if (wrap->ch == '/'){
+        lex = Lex::Slash;
+        wrap->get_next();
+        if (wrap->ch == '='){
+            lex = Lex::AssigmentDivide;
+            wrap->get_next();
+        }
+    } else if (wrap->ch == '|'){
+        lex = Lex::BitwiseOr;
+        wrap->get_next();
+        if (wrap->ch == '|'){
+            lex = Lex::LogicalOr;
+            wrap->get_next();
+        }
+    } else if (wrap->ch == '&'){
+        lex = Lex::BitwiseAnd;
+        wrap->get_next();
+        if (wrap->ch == '&'){
+            lex = Lex::LogicalAnd;
+            wrap->get_next();
+        }
+    } else if (wrap->ch == '='){
+        lex = Lex::Assigment;
+        wrap->get_next();
+        if (wrap->ch == '='){
+            lex = Lex::Compare;
+            wrap->get_next();
+        }
+    } else if (wrap->ch == '!'){
+        lex = Lex::Exclamation;
+        wrap->get_next();
+        if (wrap->ch == '='){
+            lex = Lex::CompareNegative;
+            wrap->get_next();
+        }
+    } else if (wrap->ch == '>'){
+        lex = Lex::GreaterThen;
+        wrap->get_next();
+        if (wrap->ch == '='){
+            lex = Lex::GreaterEqualThen;
+            wrap->get_next();
+        }
+    } else if (wrap->ch == '<'){
+        lex = Lex::LessThen;
+        wrap->get_next();
+        if (wrap->ch == '='){
+            lex = Lex::LessEqualThen;
             wrap->get_next();
         }
     } else{
@@ -59,20 +115,8 @@ Lex Scanner::get_next(){
             case ']':
                 lex = Lex::RSquareBrace;
                 break;
-            case '=':
-                lex = Lex::Assigment;
-                break;
-            case '/':
-                lex = Lex::Slash;
-                break;
             case '*':
                 lex = Lex::Asterisk;
-                break;
-            case '>':
-                lex = Lex::GreaterThen;
-                break;
-            case '<':
-                lex = Lex::LessThen;
                 break;
             case ':':
                 lex = Lex::Colon;
@@ -86,13 +130,19 @@ Lex Scanner::get_next(){
             case ',':
                 lex = Lex::Comma;
                 break;
+            case '^':
+                lex = Lex::Xor;
+                break;
+            case '?':
+                lex = Lex::QuestionMark;
+                break;
+            case '%':
+                lex = Lex::Mod;
+                break;
         }
         wrap->get_next();
     }
-    while (ScanWrapper::is_CRLF(wrap->ch) || ScanWrapper::is_whitespace(wrap->ch)){
-        wrap->skip_whitespace();
-        wrap->skip_CRLF();
-    }
+
     return lex;
 }
 
@@ -233,13 +283,50 @@ char Scanner::backslash_symbol(){
 }
 
 
+void Scanner::skip_whitespace_CLRF(){
+    while (ScanWrapper::is_CRLF(wrap->ch) || ScanWrapper::is_whitespace(wrap->ch)){
+        wrap->skip_whitespace();
+        wrap->skip_CRLF();
+    }
+}
+
+void Scanner::skip_comments(){
+    while (wrap->ch == '/'){
+        wrap->get_next();
+        if (wrap->ch != '/' && wrap->ch != '*'){
+            wrap->previous();
+            return;
+        }
+        if (wrap->ch == '/'){
+            wrap->get_next();
+            while (wrap->ch != ScanWrapper::EOT && !ScanWrapper::is_CRLF(wrap->ch)){
+                wrap->get_next();
+            }
+        } else {
+            wrap->get_next();
+            while (wrap->ch != ScanWrapper::EOT){
+                if (wrap->ch == '*'){
+                    wrap->get_next();
+                    if (wrap->ch == '/'){
+                        wrap->get_next();
+                        break;
+                    }
+                } else {
+                    wrap->get_next();
+                }
+            }
+        }
+        skip_whitespace_CLRF();
+    }
+}
+
 std::string to_string(Lex lex){
     using namespace std::string_literals;
     switch (lex){
         case Lex::EOT: return "конец текста"s;
         case Lex::String: return "строковый литерал"s;
         case Lex::Char: return "символьный литерал"s;
-        case Lex::Ident: return "идентификатор или ключевое слово"s;
+        case Lex::Ident: return "идентификатор"s;
         case Lex::IntNumber: return "целое число"s;
         case Lex::FloatNumber: return "число с плавающей точки"s;
         case Lex::Comma: return ","s;
@@ -286,7 +373,19 @@ std::string to_string(Lex lex){
         case Lex::Goto: return "goto"s;
         case Lex::Return: return "return"s; 
         case Lex::Break: return "break"s;
-        case Lex::Continue: return "continue"s; 
+        case Lex::Continue: return "continue"s;
+        case Lex::Xor: return "^"s;
+        case Lex::BitwiseAnd: return "&"s;
+        case Lex::BitwiseOr: return "|"s;
+        case Lex::LogicalAnd: return "&&"s;
+        case Lex::LogicalOr: return "||"s;
+        case Lex::QuestionMark: return "?"s;
+        case Lex::Compare: return "=="s;
+        case Lex::CompareNegative: return "!="s;
+        case Lex::LeftShift: return "<<"s;
+        case Lex::RightShift: return ">>"s;
+        case Lex::Mod: return "%"s;
+        case Lex::Arrow: return "->"s;
     }
     return "unknown"s;
 }

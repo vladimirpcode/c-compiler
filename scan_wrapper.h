@@ -15,6 +15,7 @@ public:
     
     ScanWrapper(const std::string& str);
     char get_next();
+    char previous();
     void skip_whitespace();
     void skip_CRLF();
     static bool is_alpha(char c);

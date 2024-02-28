@@ -6,7 +6,7 @@
 #include <sstream>
 
 int main(){
-    std::string file_name("sample.c");
+    std::string file_name("c-code-files/sample.c");
     std::ifstream fin(file_name);
     std::stringstream buffer;
     buffer << fin.rdbuf();
