@@ -1,9 +1,12 @@
 #pragma once
 
 #include <string>
-#include <scanner.h>
+#include "scanner.h"
+#include "expression_parser.h"
 
 void parse(const std::string& translation_unit_text);
+void check(Scanner& scan, Lex lex);
+void parse_function_parameters(Scanner& scan);
 
 class ParsingException : public std::exception{
 public:
