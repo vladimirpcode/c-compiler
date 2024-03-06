@@ -16,6 +16,7 @@ public:
     Scanner(const std::string& program_text);
     ~Scanner();
     Lex get_next();
+    std::string get_line_for_compiler_msg() const;
 private:
     ScanWrapper* wrap;
     void check(char c);

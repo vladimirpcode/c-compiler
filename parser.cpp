@@ -7,14 +7,21 @@
 
 using namespace std::string_literals;
 
+void error(const Scanner& scan, const std::string& msg){
+    throw ParsingException(scan.get_line_for_compiler_msg() + "\n"s + msg);
+}
+
+void expected(const Scanner& scan, const std::string& expected_value, const std::string& actual_value){
+    throw ParsingException(scan.get_line_for_compiler_msg() + "\n"s + "ожидалось "s + expected_value + " но, "s + actual_value);
+}
+
 void check(Scanner& scan, Lex lex){
     if (scan.lex == lex){
         scan.get_next();
     } else {
-        throw ParsingException("ожидалось "s + to_string(lex) + " но "s + to_string(scan.lex));
+        expected(scan, to_string(lex), to_string(scan.lex));
     }
 }
-void parse_expression(Scanner& scan);
 
 void parse_function_parameters(Scanner& scan){
     if (!(scan.lex == Lex::IntNumber
@@ -31,7 +38,7 @@ void parse_function_parameters(Scanner& scan){
 
 void parse_function_parameters_declaration(Scanner& scan){
     if (scan.lex != Lex::PrimitiveType){
-        throw ParsingException("Ожидался тип аргумента функции, но "s + to_string(scan.lex));
+       expected(scan, "тип аргумента функции, но "s, to_string(scan.lex));
     }
 
     std::string name = std::get<std::string>(scan.value);
@@ -82,7 +89,7 @@ PrimitiveType parse_type(Scanner& scan){
     if (scan.lex == Lex::Ident){
 
     } else {
-
+        
     }
 }
 
@@ -93,20 +100,20 @@ void parse(const std::string& translation_unit_text){
     name_table.open_scope();
     // функция или глобальная переменная
     if (scan.lex != Lex::PrimitiveType){
-        throw ParsingException("ожидалося идентификатор"s);
+        expected(scan, "идентификатор"s, to_string(scan.lex));
     }
-    // ToDo PrimitiveType name = std::get<std::string>(scan.value);
+    PrimitiveType name = std::get<std::string>(scan.value);
     if (scan.lex != Lex::Ident){
-        throw ParsingException("ожидалося идентификатор"s);
+        expected(scan, "идентификатор"s, to_string(scan.lex));
     }
     std::string name = std::get<std::string>(scan.value);
     scan.get_next();
     if (name_table.has_name_in_this_scope(name)){
-        throw ParsingException("имя "s + name + " уже существует");
+        error(scan, "имя "s + name + " уже существует"s);
     }
     if (scan.lex == Lex::LBrace){
         // функция
-        //ToDo name_table.add_name(name, NameTableEntryType::Function, )
+        name_table.add_name(name, NameTableEntryType::Function, )
         scan.get_next();
         parse_function_parameters_declaration(scan);
         check(scan, Lex::RBrace);

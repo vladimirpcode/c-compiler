@@ -5,6 +5,7 @@
 #include <vector>
 
 enum class NameTableEntryType{
+    TypeName,
     VarOrConst,
     Function,
     ScopeOpen,

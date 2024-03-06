@@ -4,6 +4,8 @@
 #include <iostream>
 #include "converter.h"
 
+using namespace std::string_literals;
+
 Scanner::Scanner(const std::string& program_text){
     wrap = new ScanWrapper(program_text);
     get_next();
@@ -144,6 +146,16 @@ Lex Scanner::get_next(){
     }
 
     return lex;
+}
+
+
+std::string Scanner::get_line_for_compiler_msg() const{
+    std::string result = std::to_string(wrap->line_number) + ") "s + wrap->line + "\n"s;
+    for (int i = 0; i < std::to_string(wrap->line_number).size() + 2 + wrap->symbol_number_in_line; ++i){
+        result += " "s;
+    }
+    result += "^"s;
+    return result; 
 }
 
 void Scanner::check(char c){
