@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include "converter.h"
+#include <map>
 
 using namespace std::string_literals;
 
@@ -166,7 +167,7 @@ void Scanner::check(char c){
     wrap->get_next();
 }
 
-// первый символ уже буква
+// первый символ уже буква или _
 void Scanner::ident(){
     using namespace std::string_literals;
     lex = Lex::Ident;
@@ -176,45 +177,47 @@ void Scanner::ident(){
         wrap->get_next();
     }
     value = str_value;
-    if (str_value == "void"s || str_value == "char"s
-        || str_value == "short"s || str_value == "int"s
-        || str_value == "long"s || str_value == "float"s
-        || str_value == "double"s || str_value == "signed"s
-        || str_value == "unsigned"s){
-        lex = Lex::PrimitiveType;
-    } else if (str_value == "auto"s || str_value == "register"s
-        || str_value == "static"s || str_value == "extern"s
-        || str_value == "typedef"){
-        lex = Lex::TypeSpecifier;
-    } else if (str_value == "struct"s || str_value == "union"s){
-        lex = Lex::StructOrUnion;
-    } else if (str_value == "const"s || str_value == "volatile"s){
-        lex = Lex::TypeQualifier;
-    } else if (str_value == "sizeof"s){
-        lex = Lex::Sizeof;
-    } else if (str_value == "enum"s){
-        lex = Lex::Enum;
-    } else if (str_value == "do"s){
-        lex = Lex::Do;
-    } else if (str_value == "while"s){
-        lex = Lex::While;
-    } else if (str_value == "for"s){
-        lex = Lex::For;
-    } else if (str_value == "case"s || str_value == "default"s){
-        lex = Lex::LabeledStatement;
-    } else if (str_value == "if"s){
-        lex = Lex::If;
-    } else if (str_value == "switch"s){
-        lex = Lex::Switch;
-    } else if (str_value == "goto"s){
-        lex = Lex::Goto;
-    } else if (str_value == "return"s){
-        lex = Lex::Return;
-    } else if (str_value == "break"s){
-        lex = Lex::Break;
-    } else if (str_value == "continue"s){
-        lex = Lex::Continue;
-    } 
+    std::map<std::string, Lex> lexIdent;
+    lexIdent["auto"] = Lex::Auto;
+    lexIdent["break"] = Lex::Break;
+    lexIdent["case"] = Lex::Case;
+    lexIdent["char"] = Lex::Char;
+    lexIdent["const"] = Lex::Const;
+    lexIdent["continue"] = Lex::Continue;
+    lexIdent["default"] = Lex::Default;
+    lexIdent["do"] = Lex::Do;
+    lexIdent["double"] = Lex::Double;
+    lexIdent["else"] = Lex::Else;
+    lexIdent["enum"] = Lex::Enum;
+    lexIdent["extern"] = Lex::Extern;
+    lexIdent["float"] = Lex::Float;
+    lexIdent["for"] = Lex::For;
+    lexIdent["goto"] = Lex::Goto;
+    lexIdent["if"] = Lex::If;
+    lexIdent["inline"] = Lex::Inline;
+    lexIdent["int"] = Lex::Int;
+    lexIdent["long"] = Lex::Long;
+    lexIdent["register"] = Lex::Register;
+    lexIdent["restrict"] = Lex::Restrict;
+    lexIdent["return"] = Lex::Return;
+    lexIdent["short"] = Lex::Short;
+    lexIdent["signed"] = Lex::Signed;
+    lexIdent["sizeof"] = Lex::Sizeof;
+    lexIdent["static"] = Lex::Static;
+    lexIdent["struct"] = Lex::Struct;
+    lexIdent["switch"] = Lex::Switch;
+    lexIdent["typedef"] = Lex::Typedef;
+    lexIdent["union"] = Lex::Union;
+    lexIdent["unsigned"] = Lex::Unsigned;
+    lexIdent["void"] = Lex::Void;
+    lexIdent["volatile"] = Lex::Auto;
+    lexIdent["while"] = Lex::Break;
+    lexIdent["_Bool"] = Lex::Bool_;
+    lexIdent["_Complex"] = Lex::Complex_;
+    lexIdent["_Imaginary"] = Lex::Imaginary_;
+    if (lexIdent.find(str_value) != lexIdent.end()){
+        lex = lexIdent[str_value];
+    }
 }
 
 // первый символ уже цифра
@@ -230,10 +233,10 @@ void Scanner::number(){
         while (ScanWrapper::is_number(wrap->ch)){
             num_str += wrap->ch;
         }
-        lex = Lex::FloatNumber;
+        lex = Lex::FloatLiteral;
         value = Converter::to_float(num_str);
     } else {
-        lex = Lex::IntNumber;
+        lex = Lex::IntLiteral;
         value = Converter::to_int32(num_str);
     }
 }
@@ -252,7 +255,7 @@ void Scanner::char_literal(){
         wrap->get_next();
     }
     check('\'');
-    lex = Lex::Char;
+    lex = Lex::CharLiteral;
 }
 
 // первый символ уже "
@@ -270,7 +273,7 @@ void Scanner::string_literal(){
     }
     value = str_value;
     check('\"');
-    lex = Lex::String;
+    lex = Lex::StringLiteral;
 }
 
 // первый символ уже backslash
@@ -334,70 +337,95 @@ void Scanner::skip_comments(){
 
 std::string to_string(Lex lex){
     using namespace std::string_literals;
-    switch (lex){
-        case Lex::EOT: return "конец текста"s;
-        case Lex::String: return "строковый литерал"s;
-        case Lex::Char: return "символьный литерал"s;
-        case Lex::Ident: return "идентификатор"s;
-        case Lex::IntNumber: return "целое число"s;
-        case Lex::FloatNumber: return "число с плавающей точки"s;
-        case Lex::Comma: return ","s;
-        case Lex::Dot: return "."s;
-        case Lex::Assigment: return "="s;
-        case Lex::AssigmentMultiply: return "*="s;
-        case Lex::AssigmentDivide: return "/="s;
-        case Lex::AssigmentMod: return "%="s;
-        case Lex::AssigmentPlus: return "+="s;
-        case Lex::AssigmentMinus: return "-="s;
-        case Lex::AssigmentLeftShift: return "<<="s;
-        case Lex::AssigmentRightShift: return ">>="s;
-        case Lex::AssigmentAnd: return "&="s;
-        case Lex::AssigmentXor: return "^="s;
-        case Lex::AssigmentOr: return "|="s;
-        case Lex::And: return "&"s;
-        case Lex::Asterisk: return "*"s;
-        case Lex::Plus: return "+"s;
-        case Lex::Minus: return "-"s;
-        case Lex::Tilde: return "~"s;
-        case Lex::Exclamation: return "!"s;
-        case Lex::LBrace: return "("s;
-        case Lex::RBrace: return ")"s;
-        case Lex::LCurlyBrace: return "{"s;
-        case Lex::RCurlyBrace: return "}"s;
-        case Lex::LSquareBrace: return "["s;
-        case Lex::RSquareBrace: return "]"s;
-        case Lex::Slash: return "/"s;
-        case Lex::GreaterThen: return ">"s;
-        case Lex::LessThen: return "<"s;
-        case Lex::Colon: return ":"s;
-        case Lex::SemiColon: return ";"s;
-        case Lex::PrimitiveType: return "примитивный тип"s;
-        case Lex::TypeSpecifier: return "спецификатор типа"s;
-        case Lex::StructOrUnion: return "struct или union"s;
-        case Lex::TypeQualifier: return "квалификатор типа"s;
-        case Lex::Sizeof: return "sizeof"s;
-        case Lex::Do: return "do"s;
-        case Lex::While: return "while"s;
-        case Lex::For: return "for"s;
-        case Lex::LabeledStatement: return "case | default"s;
-        case Lex::If: return "if"s;
-        case Lex::Switch: return "switch"s;
-        case Lex::Goto: return "goto"s;
-        case Lex::Return: return "return"s; 
-        case Lex::Break: return "break"s;
-        case Lex::Continue: return "continue"s;
-        case Lex::Xor: return "^"s;
-        case Lex::BitwiseAnd: return "&"s;
-        case Lex::BitwiseOr: return "|"s;
-        case Lex::LogicalAnd: return "&&"s;
-        case Lex::LogicalOr: return "||"s;
-        case Lex::QuestionMark: return "?"s;
-        case Lex::Compare: return "=="s;
-        case Lex::CompareNegative: return "!="s;
-        case Lex::LeftShift: return "<<"s;
-        case Lex::RightShift: return ">>"s;
-        case Lex::Mod: return "%"s;
-        case Lex::Arrow: return "->"s;
+    std::map<Lex, std::string> lexStr;
+    lexStr[Lex::EOT] = "конец текста"s;
+    lexStr[Lex::StringLiteral] = "строковый литерал"s;
+    lexStr[Lex::CharLiteral] = "символьный литерал"s;
+    lexStr[Lex::Ident] = "идентификатор"s;
+    lexStr[Lex::IntLiteral] = "целое число"s;
+    lexStr[Lex::FloatLiteral] = "число с плавающей точки"s;
+    lexStr[Lex::Comma] = ","s;
+    lexStr[Lex::Dot] = "."s;
+    lexStr[Lex::Assigment] = "="s;
+    lexStr[Lex::AssigmentMultiply] = "*="s;
+    lexStr[Lex::AssigmentDivide] = "/="s;
+    lexStr[Lex::AssigmentMod] = "%="s;
+    lexStr[Lex::AssigmentPlus] = "+="s;
+    lexStr[Lex::AssigmentMinus] = "-="s;
+    lexStr[Lex::AssigmentLeftShift] = "<<="s;
+    lexStr[Lex::AssigmentRightShift] = ">>="s;
+    lexStr[Lex::AssigmentAnd] = "&="s;
+    lexStr[Lex::AssigmentXor] = "^="s;
+    lexStr[Lex::AssigmentOr] = "|="s;
+    lexStr[Lex::And] = "&"s;
+    lexStr[Lex::Asterisk] = "*"s;
+    lexStr[Lex::Plus] = "+"s;
+    lexStr[Lex::Minus] = "-"s;
+    lexStr[Lex::Tilde] = "~"s;
+    lexStr[Lex::Exclamation] = "!"s;
+    lexStr[Lex::LBrace] = "("s;
+    lexStr[Lex::RBrace] = ")"s;
+    lexStr[Lex::LCurlyBrace] = "{"s;
+    lexStr[Lex::RCurlyBrace] = "}"s;
+    lexStr[Lex::LSquareBrace] = "["s;
+    lexStr[Lex::RSquareBrace] = "]"s;
+    lexStr[Lex::Slash] = "/"s;
+    lexStr[Lex::GreaterThen] = ">"s;
+    lexStr[Lex::LessThen] = "<"s;
+    lexStr[Lex::Colon] = ":"s;
+    lexStr[Lex::SemiColon] = ";"s;
+    lexStr[Lex::Xor] = "^"s;
+    lexStr[Lex::BitwiseAnd] = "&"s;
+    lexStr[Lex::BitwiseOr] = "|"s;
+    lexStr[Lex::LogicalAnd] = "&&"s;
+    lexStr[Lex::LogicalOr] = "||"s;
+    lexStr[Lex::QuestionMark] = "?"s;
+    lexStr[Lex::Compare] = "=="s;
+    lexStr[Lex::CompareNegative] = "!="s;
+    lexStr[Lex::LeftShift] = "<<"s;
+    lexStr[Lex::RightShift] = ">>"s;
+    lexStr[Lex::Mod] = "%"s;
+    lexStr[Lex::Arrow] = "->"s;
+    //ключевые слова
+    lexStr[Lex::Auto] = "auto"s;
+    lexStr[Lex::Break] = "break"s;
+    lexStr[Lex::Case] = "case"s;
+    lexStr[Lex::Char] = "char"s;
+    lexStr[Lex::Const] = "const"s;
+    lexStr[Lex::Continue] = "continue"s;
+    lexStr[Lex::Default] = "default"s;
+    lexStr[Lex::Do] = "do"s;
+    lexStr[Lex::Double] = "double"s;
+    lexStr[Lex::Else] = "else"s;
+    lexStr[Lex::Enum] = "enum"s;
+    lexStr[Lex::Extern] = "extern"s;
+    lexStr[Lex::Float] = "float"s;
+    lexStr[Lex::For] = "for"s;
+    lexStr[Lex::Goto] = "goto"s;
+    lexStr[Lex::If] = "if"s;
+    lexStr[Lex::Inline] = "inline"s;
+    lexStr[Lex::Int] = "int"s;
+    lexStr[Lex::Long] = "long"s;
+    lexStr[Lex::Register] = "register"s;
+    lexStr[Lex::Restrict] = "restrict"s;
+    lexStr[Lex::Return] = "return"s;
+    lexStr[Lex::Short] = "short"s;
+    lexStr[Lex::Signed] = "signed"s;
+    lexStr[Lex::Sizeof] = "sizeof"s;
+    lexStr[Lex::Static] = "static"s;
+    lexStr[Lex::Struct] = "struct"s;
+    lexStr[Lex::Switch] = "switch"s;
+    lexStr[Lex::Typedef] = "typedef"s;
+    lexStr[Lex::Union] = "union"s;
+    lexStr[Lex::Unsigned] = "unsigned"s;
+    lexStr[Lex::Void] = "void"s;
+    lexStr[Lex::Volatile] = "volatile"s;
+    lexStr[Lex::While] = "while"s;
+    lexStr[Lex::Bool_] = "_Bool"s;
+    lexStr[Lex::Complex_] = "_Complex"s;
+    lexStr[Lex::Imaginary_] = "_Imaginary"s;
+    if (lexStr.find(lex) != lexStr.end()){
+        return lexStr[lex];
     }
     return "unknown"s;
 }

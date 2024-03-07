@@ -4,7 +4,7 @@
 #include "scanner.h"
 
 void parse_end_value(Scanner& scan){
-    if (scan.lex == Lex::IntNumber || scan.lex == Lex::FloatNumber){
+    if (scan.lex == Lex::IntLiteral || scan.lex == Lex::FloatLiteral){
         scan.get_next();
     } else if (scan.lex == Lex::Ident){
         scan.get_next();
@@ -214,7 +214,7 @@ bool is_correct_expression_start(Lex lex){
     return lex == Lex::PrimitiveType 
         || lex == Lex::Return
         || lex == Lex::Goto
-        || lex == Lex::IntNumber
-        || lex == Lex::FloatNumber
+        || lex == Lex::IntLiteral
+        || lex == Lex::FloatLiteral
         || lex == Lex::Ident;
 }

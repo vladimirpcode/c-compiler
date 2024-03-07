@@ -66,16 +66,14 @@ private:
 
 enum class Lex{
     EOT, // конец текста
-    String,
-    Char,
+    StringLiteral,
+    CharLiteral,
     Ident,
-
-    IntNumber,
-    FloatNumber,
+    IntLiteral,
+    FloatLiteral,
 
     Comma, // ,
     Dot, // .
-
     Assigment,  // =
     AssigmentMultiply, // *=
     AssigmentDivide, // /=
@@ -87,10 +85,8 @@ enum class Lex{
     AssigmentAnd, // &=
     AssigmentXor, // ^=
     AssigmentOr, // |=
-
     Compare, // ==
     CompareNegative, // !=
-
     And, // &
     Asterisk, // *
     Plus,
@@ -105,7 +101,6 @@ enum class Lex{
     LogicalOr,  // ||
     LeftShift, // <<
     RightShift, // >>
-
     LBrace, // (
     RBrace, // )
     LCurlyBrace, // {
@@ -118,31 +113,50 @@ enum class Lex{
     LessThen, // <
     GreaterEqualThen, // >=
     LessEqualThen, // <=
-    //QuotationMark, // '
-    //DoubleQuotationMark, // "
     Colon, // :
     SemiColon, // ;
     Arrow, // ->
-
-    PrimitiveType, // int, float, etc...
-    TypeSpecifier, // auto, static, etc...
-    StructOrUnion, // struct | union
-    TypeQualifier, // const | volatile
-    Sizeof,
-    Enum,
-    While,
-    For,
-    Do,
-    LabeledStatement, //case | default
-    If,
-    Switch,
-    Goto,
-    Return,
-    Break,
-    Continue,
-
     Increment, // ++
     Decrement, // --
+
+    // keywords ключевые слова
+    Auto,
+    Break,
+    Case,
+    Char,
+    Const,
+    Continue,
+    Default,
+    Do,
+    Double,
+    Else,
+    Enum,
+    Extern,
+    Float,
+    For,
+    Goto,
+    If,
+    Inline,
+    Int,
+    Long,
+    Register,
+    Restrict,
+    Return,
+    Short,
+    Signed,
+    Sizeof,
+    Static,
+    Struct,
+    Switch,
+    Typedef,
+    Union,
+    Unsigned,
+    Void,
+    Volatile,
+    While,
+    Bool_,
+    Complex_,
+    Imaginary_
 };
 
 std::string to_string(Lex lex);

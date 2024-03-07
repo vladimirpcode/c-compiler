@@ -23,73 +23,74 @@ void check(Scanner& scan, Lex lex){
     }
 }
 
-void parse_function_parameters(Scanner& scan){
-    if (!(scan.lex == Lex::IntNumber
-        || scan.lex == Lex::FloatNumber
-        || scan.lex == Lex::Ident)){
+/* ISO/IEC 9899:1999(E) A.2.4
+function-definition:
+    declaration-specifiers declarator [declaration-list] compound-statement
+*/
+void parse_function_definition(Scanner& scan){
+
+}
+
+/* ISO/IEC 9899:1999(E) A.2.2
+declarator:
+    [pointer] direct-declarator
+*/
+void parse_declarator(Scanner& scan){
+    
+}
+
+/* ISO/IEC 9899:1999(E) A.2.2
+init-declarator:
+    declarator
+    declarator = initializer
+*/
+void parse_init_declarator(Scanner& scan){
+    parse_declarator(scan);
+    if (scan.lex == Lex::Assigment){
+        scan.get_next();
+        parse_initializer(scan);
+    }
+}
+
+/* ISO/IEC 9899:1999(E) A.2.2
+declaration:
+    declaration-specifiers [init-declarator-list] ;
+init-declarator-list:
+    init-declarator
+    init-declarator-list , init-declarator
+*/
+void parse_declaration(Scanner& scan){
+    parse_declaration_specifiers(scan);
+    if (scan.lex == Lex::SemiColon){
+        scan.get_next();
         return;
     }
-    parse_expression(scan);
+    parse_init_declarator(scan);
     while (scan.lex == Lex::Comma){
         scan.get_next();
-        parse_expression(scan);
+        parse_init_declarator(scan);
     }
+    check(scan, Lex::SemiColon);
+
 }
 
-void parse_function_parameters_declaration(Scanner& scan){
-    if (scan.lex != Lex::PrimitiveType){
-       expected(scan, "тип аргумента функции, но "s, to_string(scan.lex));
-    }
-
-    std::string name = std::get<std::string>(scan.value);
-    if (name == "void"s){
-        scan.get_next();
-        return;
-    }
-    check(scan, Lex::PrimitiveType);
-    if (scan.lex == Lex::Asterisk){
-        scan.get_next();
-    } else {
-        check(scan, Lex::Ident);
-    }
-    while (scan.lex == Lex::Comma){
-        scan.get_next();
-        check(scan, Lex::PrimitiveType);
-        if (scan.lex == Lex::Asterisk){
-            scan.get_next();
-        }
-        check(scan, Lex::Ident);
-    }
-}
-
-void parse_function_body(Scanner& scan){
-    while (is_correct_expression_start(scan.lex)){
-        if (scan.lex == Lex::PrimitiveType){
-            // объявление переменной
-            scan.get_next();
-            check(scan, Lex::Ident);
-            if (scan.lex == Lex::Assigment){
-                scan.get_next();
-                parse_expression(scan);
-            }
-            check(scan, Lex::SemiColon);
-        } else if (scan.lex == Lex::Return){
-            scan.get_next();
-            parse_expression(scan);
-            check(scan, Lex::SemiColon); 
-        } else {
-            // выражение
-            parse_expression(scan);
-            check(scan, Lex::SemiColon);
-        }
-    }
-}
-
-PrimitiveType parse_type(Scanner& scan){
-    if (scan.lex == Lex::Ident){
-
-    } else {
+/* ISO/IEC 9899:1999(E) A.2.4
+translation-unit:
+    external-declaration
+    translation-unit external-declaration
+external-declaration:
+    function-definition
+    declaration
+*/
+void parse_translation_unit(Scanner& scan){
+    //look ahead
+    while (scan.lex != Lex::EOT){
+        try {
+            parse_function_definition(scan);
+            return;
+        } catch (ParsingException e){}
         
+        parse_declaration(scan);
     }
 }
 
@@ -98,36 +99,6 @@ void parse(const std::string& translation_unit_text){
     // глобальная область видимость
     name_table.entries.clear(); //ToDo отрефакторить, определить где лежать таблице имен
     name_table.open_scope();
-    // функция или глобальная переменная
-    if (scan.lex != Lex::PrimitiveType){
-        expected(scan, "идентификатор"s, to_string(scan.lex));
-    }
-    PrimitiveType name = std::get<std::string>(scan.value);
-    if (scan.lex != Lex::Ident){
-        expected(scan, "идентификатор"s, to_string(scan.lex));
-    }
-    std::string name = std::get<std::string>(scan.value);
-    scan.get_next();
-    if (name_table.has_name_in_this_scope(name)){
-        error(scan, "имя "s + name + " уже существует"s);
-    }
-    if (scan.lex == Lex::LBrace){
-        // функция
-        name_table.add_name(name, NameTableEntryType::Function, )
-        scan.get_next();
-        parse_function_parameters_declaration(scan);
-        check(scan, Lex::RBrace);
-        check(scan, Lex::LCurlyBrace);
-        parse_function_body(scan);
-        check(scan, Lex::RCurlyBrace);
-
-    } else {
-        // глобальная переменная
-        if (scan.lex == Lex::Assigment){
-            scan.get_next();
-            parse_expression(scan);
-        }
-        check(scan, Lex::SemiColon);
-    }
+    
 
 }
