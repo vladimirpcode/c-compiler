@@ -47,6 +47,7 @@ public:
     void close_scope();
     bool has_name(const std::string& name);
     bool has_name_in_this_scope(const std::string& name);
+    bool has_name_in_this_scope(const std::string& name, NameTableEntryType& nameTableEntryType);
     void add_name(std::string name, NameTableEntryType entry_type, PrimitiveType value_type, NameTableValue value, bool is_mutable);
 };
 

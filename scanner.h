@@ -4,10 +4,16 @@
 #include <fstream>
 #include "scan_wrapper.h"
 #include <variant>
+#include <stack>
 
 enum class Lex;
 
 using LexerValue = std::variant<std::string, char, int, float>;
+
+struct ScannerState{
+    size_t text_pos;
+    size_t lexem_number;
+};
 
 class Scanner{
 public:
@@ -17,8 +23,12 @@ public:
     ~Scanner();
     Lex get_next();
     std::string get_line_for_compiler_msg() const;
+    void save_state();
+    void load_state();
 private:
     ScanWrapper* wrap;
+    std::vector<Lex> processed_lexems;
+    std::stack<ScannerState> scanner_states;
     void check(char c);
     void ident();
     void number();
@@ -156,7 +166,9 @@ enum class Lex{
     While,
     Bool_,
     Complex_,
-    Imaginary_
+    Imaginary_,
+
+    UserDefinedType, // for lexer hack
 };
 
 std::string to_string(Lex lex);

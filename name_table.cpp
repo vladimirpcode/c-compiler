@@ -29,6 +29,13 @@ bool NameTable::has_name(const std::string& name){
 
 
 bool NameTable::has_name_in_this_scope(const std::string& name){
+    NameTableEntryType nameTableEntryType = NameTableEntryType::ScopeClose;
+    return has_name_in_this_scope(name, nameTableEntryType);
+}
+
+
+bool NameTable::has_name_in_this_scope(const std::string& name, NameTableEntryType& nameTableEntryType)
+{
     auto iter = entries.end();
     --iter;
     while (iter != entries.begin() && iter->entry_type != NameTableEntryType::ScopeOpen){
@@ -43,6 +50,7 @@ bool NameTable::has_name_in_this_scope(const std::string& name){
             --iter;
         } else {
             if (iter->name == name){
+                nameTableEntryType = iter->entry_type;
                 return true;
             }
             --iter;

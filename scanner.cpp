@@ -4,6 +4,7 @@
 #include <iostream>
 #include "converter.h"
 #include <map>
+#include "name_table.h"
 
 using namespace std::string_literals;
 
@@ -21,7 +22,7 @@ Lex Scanner::get_next(){
     skip_comments();
     skip_whitespace_CLRF();
     
-    if (ScanWrapper::is_alpha(wrap->ch)){
+    if (ScanWrapper::is_alpha(wrap->ch) || wrap->ch == '_'){
         ident();
     } else if (ScanWrapper::is_number(wrap->ch)){
         number();
@@ -172,7 +173,9 @@ void Scanner::ident(){
     using namespace std::string_literals;
     lex = Lex::Ident;
     std::string str_value = std::string("");
-    while (ScanWrapper::is_alpha(wrap->ch)){
+    str_value += wrap->ch;
+    wrap->get_next();
+    while (ScanWrapper::is_alpha(wrap->ch) || ScanWrapper::is_number(wrap->ch) || wrap->ch == '_'){
         str_value += wrap->ch;
         wrap->get_next();
     }
@@ -217,6 +220,12 @@ void Scanner::ident(){
     lexIdent["_Imaginary"] = Lex::Imaginary_;
     if (lexIdent.find(str_value) != lexIdent.end()){
         lex = lexIdent[str_value];
+    }
+    NameTableEntryType nameTableEntryType = NameTableEntryType::ScopeClose;
+    if (name_table.has_name_in_this_scope(str_value, nameTableEntryType)){
+        if (nameTableEntryType == NameTableEntryType::TypeName){
+            lex = Lex::UserDefinedType;
+        }
     }
 }
 

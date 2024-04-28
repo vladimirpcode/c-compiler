@@ -6,7 +6,6 @@
 
 void parse(const std::string& translation_unit_text);
 void check(Scanner& scan, Lex lex);
-void parse_function_parameters(Scanner& scan);
 void error(const Scanner& scan, const std::string& msg);
 void expected(const Scanner& scan, const std::string& expected_value, const std::string& actual_value);
 
