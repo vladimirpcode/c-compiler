@@ -5,20 +5,20 @@
 #include "scan_wrapper.h"
 #include <variant>
 #include <stack>
+#include <vector>
 
 enum class Lex;
 
 using LexerValue = std::variant<std::string, char, int, float>;
 
 struct ScannerState{
-    size_t text_pos;
-    size_t lexem_number;
+    Lex lex;
+    LexerValue value;
 };
 
 class Scanner{
 public:
-    Lex lex;
-    LexerValue value;
+    ScannerState current_state;
     Scanner(const std::string& program_text);
     ~Scanner();
     Lex get_next();
@@ -27,8 +27,7 @@ public:
     void load_state();
 private:
     ScanWrapper* wrap;
-    std::vector<Lex> processed_lexems;
-    std::stack<ScannerState> scanner_states;
+    std::stack<ScannerState> states;
     void check(char c);
     void ident();
     void number();

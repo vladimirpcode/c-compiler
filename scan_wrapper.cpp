@@ -1,50 +1,63 @@
 #include "scan_wrapper.h"
 
 ScanWrapper::ScanWrapper(const std::string& str) 
-    : data(str), 
-    index(0),
-    line_number(1),
-    symbol_number_in_line(0)
+    : data(str)
 {
+    current_state.line_number = 1;
+    current_state.symbol_number_in_line = 0;
+    current_state.index = 0;
     get_next();
 }
 
 char ScanWrapper::get_next(){
-    if (index == data.length()){
-        ch = EOT;
+    if (current_state.index == data.length()){
+        current_state.ch = EOT;
         return EOT;
     }
-    ch = data[index];
-    index++;
-    symbol_number_in_line++;
-    line += ch;
-    if (ch == LF){
-        line_number++;
-        symbol_number_in_line = 0;
-        line = std::string("");
+    current_state.ch = data[current_state.index];
+    current_state.index++;
+    current_state.symbol_number_in_line++;
+    current_state.line += current_state.ch;
+    if (current_state.ch == LF){
+        current_state.line_number++;
+        current_state.symbol_number_in_line = 0;
+        current_state.line = std::string("");
     }
-    return ch;
+    return current_state.ch;
 }
 
 char ScanWrapper::previous(){
-    if (index == 1u){
-        return ch;
+    if (current_state.index == 1u){
+        return current_state.ch;
     }
-    ch = data[index-2u];
-    index--;
-    return ch;
+    current_state.ch = data[current_state.index-2u];
+    current_state.index--;
+    return current_state.ch;
 }
 
 void ScanWrapper::skip_whitespace(){
-    while (is_whitespace(ch)){
+    while (is_whitespace(current_state.ch)){
         get_next();
     }
 }
 
 void ScanWrapper::skip_CRLF(){
-    while (ch == CR || ch == LF){
+    while (current_state.ch == CR || current_state.ch == LF){
         get_next();
     }
+}
+
+
+void ScanWrapper::save_state(){
+    states.push(current_state);
+}
+
+void ScanWrapper::load_state(){
+    if (states.size() == 0){
+        throw std::exception();
+    }
+    current_state = states.top();
+    states.pop();
 }
 
 bool ScanWrapper::is_whitespace(char c){

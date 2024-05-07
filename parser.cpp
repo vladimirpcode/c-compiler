@@ -17,10 +17,10 @@ void expected(const Scanner& scan, const std::string& expected_value, const std:
 }
 
 void check(Scanner& scan, Lex lex){
-    if (scan.lex == lex){
+    if (scan.current_state.lex == lex){
         scan.get_next();
     } else {
-        expected(scan, to_string(lex), to_string(scan.lex));
+        expected(scan, to_string(lex), to_string(scan.current_state.lex));
     }
 }
 

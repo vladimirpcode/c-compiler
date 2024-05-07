@@ -1,6 +1,6 @@
 #include "name_table.h"
 
-#include "name_table.h"
+#include <iostream>
 
 using namespace std::string_literals;
 
@@ -36,25 +36,27 @@ bool NameTable::has_name_in_this_scope(const std::string& name){
 
 bool NameTable::has_name_in_this_scope(const std::string& name, NameTableEntryType& nameTableEntryType)
 {
+    if (entries.size() == 0){
+        return false;
+    }
     auto iter = entries.end();
     --iter;
+    std::cout << iter->name << "\n";
     while (iter != entries.begin() && iter->entry_type != NameTableEntryType::ScopeOpen){
         if (iter->entry_type == NameTableEntryType::ScopeClose){
-            while (iter != entries.begin() 
-                && iter->entry_type != NameTableEntryType::ScopeOpen){
+            while (iter != entries.begin() && iter->entry_type != NameTableEntryType::ScopeOpen){
                 --iter;
             }
             if (iter == entries.begin()){
                 return false;
             }
-            --iter;
         } else {
             if (iter->name == name){
                 nameTableEntryType = iter->entry_type;
                 return true;
             }
-            --iter;
         }
+        --iter;
     }
     return false;
 }

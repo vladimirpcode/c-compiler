@@ -22,148 +22,163 @@ Lex Scanner::get_next(){
     skip_comments();
     skip_whitespace_CLRF();
     
-    if (ScanWrapper::is_alpha(wrap->ch) || wrap->ch == '_'){
+    if (ScanWrapper::is_alpha(wrap->current_state.ch) || wrap->current_state.ch == '_'){
         ident();
-    } else if (ScanWrapper::is_number(wrap->ch)){
+    } else if (ScanWrapper::is_number(wrap->current_state.ch)){
         number();
-    } else if (wrap->ch == '\''){
+    } else if (wrap->current_state.ch == '\''){
         char_literal();
-    } else if (wrap->ch == '\"'){
+    } else if (wrap->current_state.ch == '\"'){
         string_literal();
-    } else if (wrap->ch == '+'){
-        lex = Lex::Plus;
+    } else if (wrap->current_state.ch == '+'){
+        current_state.lex = Lex::Plus;
         wrap->get_next();
-        if (wrap->ch == '+'){
-            lex = Lex::Increment;
+        if (wrap->current_state.ch == '+'){
+            current_state.lex = Lex::Increment;
             wrap->get_next();
         }
-    } else if (wrap->ch == '-'){
-        lex = Lex::Minus;
+    } else if (wrap->current_state.ch == '-'){
+        current_state.lex = Lex::Minus;
         wrap->get_next();
-        if (wrap->ch == '-'){
-            lex = Lex::Decrement;
+        if (wrap->current_state.ch == '-'){
+            current_state.lex = Lex::Decrement;
             wrap->get_next();
-        } else if (wrap->ch == '>'){
-            lex = Lex::Arrow;
-            wrap->get_next();
-        }
-    } else if (wrap->ch == '/'){
-        lex = Lex::Slash;
-        wrap->get_next();
-        if (wrap->ch == '='){
-            lex = Lex::AssigmentDivide;
+        } else if (wrap->current_state.ch == '>'){
+            current_state.lex = Lex::Arrow;
             wrap->get_next();
         }
-    } else if (wrap->ch == '|'){
-        lex = Lex::BitwiseOr;
+    } else if (wrap->current_state.ch == '/'){
+        current_state.lex = Lex::Slash;
         wrap->get_next();
-        if (wrap->ch == '|'){
-            lex = Lex::LogicalOr;
+        if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::AssigmentDivide;
             wrap->get_next();
         }
-    } else if (wrap->ch == '&'){
-        lex = Lex::BitwiseAnd;
+    } else if (wrap->current_state.ch == '|'){
+        current_state.lex = Lex::BitwiseOr;
         wrap->get_next();
-        if (wrap->ch == '&'){
-            lex = Lex::LogicalAnd;
+        if (wrap->current_state.ch == '|'){
+            current_state.lex = Lex::LogicalOr;
             wrap->get_next();
         }
-    } else if (wrap->ch == '='){
-        lex = Lex::Assigment;
+    } else if (wrap->current_state.ch == '&'){
+        current_state.lex = Lex::BitwiseAnd;
         wrap->get_next();
-        if (wrap->ch == '='){
-            lex = Lex::Compare;
+        if (wrap->current_state.ch == '&'){
+            current_state.lex = Lex::LogicalAnd;
             wrap->get_next();
         }
-    } else if (wrap->ch == '!'){
-        lex = Lex::Exclamation;
+    } else if (wrap->current_state.ch == '='){
+        current_state.lex = Lex::Assigment;
         wrap->get_next();
-        if (wrap->ch == '='){
-            lex = Lex::CompareNegative;
+        if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::Compare;
             wrap->get_next();
         }
-    } else if (wrap->ch == '>'){
-        lex = Lex::GreaterThen;
+    } else if (wrap->current_state.ch == '!'){
+        current_state.lex = Lex::Exclamation;
         wrap->get_next();
-        if (wrap->ch == '='){
-            lex = Lex::GreaterEqualThen;
+        if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::CompareNegative;
             wrap->get_next();
         }
-    } else if (wrap->ch == '<'){
-        lex = Lex::LessThen;
+    } else if (wrap->current_state.ch == '>'){
+        current_state.lex = Lex::GreaterThen;
         wrap->get_next();
-        if (wrap->ch == '='){
-            lex = Lex::LessEqualThen;
+        if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::GreaterEqualThen;
+            wrap->get_next();
+        }
+    } else if (wrap->current_state.ch == '<'){
+        current_state.lex = Lex::LessThen;
+        wrap->get_next();
+        if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::LessEqualThen;
             wrap->get_next();
         }
     } else{
-        switch (wrap->ch){
+        switch (wrap->current_state.ch){
             case ScanWrapper::EOT:
-                lex = Lex::EOT;
+                current_state.lex = Lex::EOT;
                 break;
             case '(':
-                lex = Lex::LBrace;
+                current_state.lex = Lex::LBrace;
                 break;
             case ')':
-                lex = Lex::RBrace;
+                current_state.lex = Lex::RBrace;
                 break;
             case '{':
-                lex = Lex::LCurlyBrace;
+                current_state.lex = Lex::LCurlyBrace;
                 break;
             case '}':
-                lex = Lex::RCurlyBrace;
+                current_state.lex = Lex::RCurlyBrace;
                 break;
             case '[':
-                lex = Lex::LSquareBrace;
+                current_state.lex = Lex::LSquareBrace;
                 break;
             case ']':
-                lex = Lex::RSquareBrace;
+                current_state.lex = Lex::RSquareBrace;
                 break;
             case '*':
-                lex = Lex::Asterisk;
+                current_state.lex = Lex::Asterisk;
                 break;
             case ':':
-                lex = Lex::Colon;
+                current_state.lex = Lex::Colon;
                 break;
             case ';':
-                lex = Lex::SemiColon;
+                current_state.lex = Lex::SemiColon;
                 break;
             case '.':
-                lex = Lex::Dot;
+                current_state.lex = Lex::Dot;
                 break;
             case ',':
-                lex = Lex::Comma;
+                current_state.lex = Lex::Comma;
                 break;
             case '^':
-                lex = Lex::Xor;
+                current_state.lex = Lex::Xor;
                 break;
             case '?':
-                lex = Lex::QuestionMark;
+                current_state.lex = Lex::QuestionMark;
                 break;
             case '%':
-                lex = Lex::Mod;
+                current_state.lex = Lex::Mod;
                 break;
         }
         wrap->get_next();
     }
 
-    return lex;
+    return current_state.lex;
 }
 
 
 std::string Scanner::get_line_for_compiler_msg() const{
-    std::string result = std::to_string(wrap->line_number) + ") "s + wrap->line + "\n"s;
-    for (int i = 0; i < std::to_string(wrap->line_number).size() + 2 + wrap->symbol_number_in_line; ++i){
+    std::string result = std::to_string(wrap->current_state.line_number) + ") "s + wrap->current_state.line + "\n"s;
+    for (int i = 0; i < std::to_string(wrap->current_state.line_number).size() + 2 + wrap->current_state.symbol_number_in_line; ++i){
         result += " "s;
     }
     result += "^"s;
     return result; 
 }
 
+
+void Scanner::save_state(){
+    wrap->save_state();
+    states.push(current_state);
+}
+
+void Scanner::load_state(){
+    if (states.size() == 0){
+        throw std::exception();
+    }
+    wrap->load_state();
+    current_state = states.top();
+    states.pop();
+}
+
 void Scanner::check(char c){
     using namespace std::string_literals;
-    if (wrap->ch != c){
-        throw ExpectedLexException{""s + c, wrap->line, wrap->line_number, wrap->symbol_number_in_line};
+    if (wrap->current_state.ch != c){
+        throw ExpectedLexException{""s + c, wrap->current_state.line, wrap->current_state.line_number, wrap->current_state.symbol_number_in_line};
     }
     wrap->get_next();
 }
@@ -171,15 +186,15 @@ void Scanner::check(char c){
 // первый символ уже буква или _
 void Scanner::ident(){
     using namespace std::string_literals;
-    lex = Lex::Ident;
+    current_state.lex = Lex::Ident;
     std::string str_value = std::string("");
-    str_value += wrap->ch;
+    str_value += wrap->current_state.ch;
     wrap->get_next();
-    while (ScanWrapper::is_alpha(wrap->ch) || ScanWrapper::is_number(wrap->ch) || wrap->ch == '_'){
-        str_value += wrap->ch;
+    while (ScanWrapper::is_alpha(wrap->current_state.ch) || ScanWrapper::is_number(wrap->current_state.ch) || wrap->current_state.ch == '_'){
+        str_value += wrap->current_state.ch;
         wrap->get_next();
     }
-    value = str_value;
+    current_state.value = str_value;
     std::map<std::string, Lex> lexIdent;
     lexIdent["auto"] = Lex::Auto;
     lexIdent["break"] = Lex::Break;
@@ -219,12 +234,13 @@ void Scanner::ident(){
     lexIdent["_Complex"] = Lex::Complex_;
     lexIdent["_Imaginary"] = Lex::Imaginary_;
     if (lexIdent.find(str_value) != lexIdent.end()){
-        lex = lexIdent[str_value];
+        current_state.lex = lexIdent[str_value];
     }
     NameTableEntryType nameTableEntryType = NameTableEntryType::ScopeClose;
     if (name_table.has_name_in_this_scope(str_value, nameTableEntryType)){
+        std::cout << "VOV1\n";
         if (nameTableEntryType == NameTableEntryType::TypeName){
-            lex = Lex::UserDefinedType;
+            current_state.lex = Lex::UserDefinedType;
         }
     }
 }
@@ -232,21 +248,21 @@ void Scanner::ident(){
 // первый символ уже цифра
 void Scanner::number(){
     std::string num_str;
-    while (ScanWrapper::is_number(wrap->ch)){
-        num_str += wrap->ch;
+    while (ScanWrapper::is_number(wrap->current_state.ch)){
+        num_str += wrap->current_state.ch;
         wrap->get_next();
     }
-    if (wrap->ch == '.'){
-        num_str += wrap->ch;
+    if (wrap->current_state.ch == '.'){
+        num_str += wrap->current_state.ch;
         wrap->get_next();
-        while (ScanWrapper::is_number(wrap->ch)){
-            num_str += wrap->ch;
+        while (ScanWrapper::is_number(wrap->current_state.ch)){
+            num_str += wrap->current_state.ch;
         }
-        lex = Lex::FloatLiteral;
-        value = Converter::to_float(num_str);
+        current_state.lex = Lex::FloatLiteral;
+        current_state.value = Converter::to_float(num_str);
     } else {
-        lex = Lex::IntLiteral;
-        value = Converter::to_int32(num_str);
+        current_state.lex = Lex::IntLiteral;
+        current_state.value = Converter::to_int32(num_str);
     }
 }
 
@@ -254,17 +270,17 @@ void Scanner::number(){
 void Scanner::char_literal(){
     using namespace std::string_literals;
     wrap->get_next();
-    if (!ScanWrapper::is_alpha(wrap->ch)){
-        throw ExpectedLexException{"символ"s, wrap->line, wrap->line_number, wrap->symbol_number_in_line};
+    if (!ScanWrapper::is_alpha(wrap->current_state.ch)){
+        throw ExpectedLexException{"символ"s, wrap->current_state.line, wrap->current_state.line_number, wrap->current_state.symbol_number_in_line};
     }
-    if (wrap->ch == '\\'){
-        value = backslash_symbol();
+    if (wrap->current_state.ch == '\\'){
+        current_state.value = backslash_symbol();
     } else {
-        value = wrap->ch;
+        current_state.value = wrap->current_state.ch;
         wrap->get_next();
     }
     check('\'');
-    lex = Lex::CharLiteral;
+    current_state.lex = Lex::CharLiteral;
 }
 
 // первый символ уже "
@@ -272,24 +288,24 @@ void Scanner::string_literal(){
     using namespace std::string_literals;
     wrap->get_next();
     std::string str_value = ""s;
-    while(ScanWrapper::is_alpha(wrap->ch)){
-        if (wrap->ch == '\\'){
+    while(ScanWrapper::is_alpha(wrap->current_state.ch)){
+        if (wrap->current_state.ch == '\\'){
             str_value += backslash_symbol();
         } else {
-            str_value += wrap->ch;
+            str_value += wrap->current_state.ch;
             wrap->get_next();
         }
     }
-    value = str_value;
+    current_state.value = str_value;
     check('\"');
-    lex = Lex::StringLiteral;
+    current_state.lex = Lex::StringLiteral;
 }
 
 // первый символ уже backslash
 char Scanner::backslash_symbol(){
     wrap->get_next();
     char result;
-    switch (wrap->ch){
+    switch (wrap->current_state.ch){
         case 'n':
             result = '\n';
             break;
@@ -308,30 +324,30 @@ char Scanner::backslash_symbol(){
 
 
 void Scanner::skip_whitespace_CLRF(){
-    while (ScanWrapper::is_CRLF(wrap->ch) || ScanWrapper::is_whitespace(wrap->ch)){
+    while (ScanWrapper::is_CRLF(wrap->current_state.ch) || ScanWrapper::is_whitespace(wrap->current_state.ch)){
         wrap->skip_whitespace();
         wrap->skip_CRLF();
     }
 }
 
 void Scanner::skip_comments(){
-    while (wrap->ch == '/'){
+    while (wrap->current_state.ch == '/'){
         wrap->get_next();
-        if (wrap->ch != '/' && wrap->ch != '*'){
+        if (wrap->current_state.ch != '/' && wrap->current_state.ch != '*'){
             wrap->previous();
             return;
         }
-        if (wrap->ch == '/'){
+        if (wrap->current_state.ch == '/'){
             wrap->get_next();
-            while (wrap->ch != ScanWrapper::EOT && !ScanWrapper::is_CRLF(wrap->ch)){
+            while (wrap->current_state.ch != ScanWrapper::EOT && !ScanWrapper::is_CRLF(wrap->current_state.ch)){
                 wrap->get_next();
             }
         } else {
             wrap->get_next();
-            while (wrap->ch != ScanWrapper::EOT){
-                if (wrap->ch == '*'){
+            while (wrap->current_state.ch != ScanWrapper::EOT){
+                if (wrap->current_state.ch == '*'){
                     wrap->get_next();
-                    if (wrap->ch == '/'){
+                    if (wrap->current_state.ch == '/'){
                         wrap->get_next();
                         break;
                     }

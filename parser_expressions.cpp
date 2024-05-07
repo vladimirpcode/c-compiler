@@ -2,21 +2,21 @@
 
 
 void parse_primary_expression(Scanner& scan){
-    if (scan.lex == Lex::Ident){
+    if (scan.current_state.lex == Lex::Ident){
         scan.get_next();
-    } else if(scan.lex == Lex::FloatLiteral
-        || scan.lex == Lex::IntLiteral){
+    } else if(scan.current_state.lex == Lex::FloatLiteral
+        || scan.current_state.lex == Lex::IntLiteral){
         scan.get_next();
-    } else if (scan.lex == Lex::CharLiteral){
+    } else if (scan.current_state.lex == Lex::CharLiteral){
         scan.get_next();
-    } else if (scan.lex == Lex::StringLiteral){
+    } else if (scan.current_state.lex == Lex::StringLiteral){
         scan.get_next();
-    } else if (scan.lex == Lex::LBrace) {
+    } else if (scan.current_state.lex == Lex::LBrace) {
         scan.get_next();
         parse_expression(scan);
         check(scan, Lex::RBrace);
     } else {
-        expected(scan, "ident | constant | string literal | (expression)", to_string(scan.lex));
+        expected(scan, "ident | constant | string literal | (expression)", to_string(scan.current_state.lex));
     }
 }
 
