@@ -1,8 +1,7 @@
 #pragma once
 
 #include <string>
-#include "scanner.h"
-#include "expression_parser.h"
+#include "../scanner.h"
 
 void parse(const std::string& translation_unit_text);
 void check(Scanner& scan, Lex lex);

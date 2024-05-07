@@ -25,6 +25,7 @@ public:
     std::string get_line_for_compiler_msg() const;
     void save_state();
     void load_state();
+    void delete_state();
 private:
     ScanWrapper* wrap;
     std::stack<ScannerState> states;
@@ -51,26 +52,15 @@ protected:
 
 class ExpectedLexException : public BadLexException{
 public:
-    ExpectedLexException(const std::string& expected_msg, const std::string line, size_t line_number, size_t char_pos) 
-        : BadLexException(expected_msg),
-        m_line(line),
-        m_line_number(line_number),
-        m_char_pos(char_pos){}
+    ExpectedLexException(const std::string& expected_msg, const std::string& context_msg) 
+        : BadLexException(expected_msg) {}
 
     virtual const char* what() const noexcept override{
         using namespace std::string_literals;
-        std::string msg = "в строке "s + std::to_string(m_line_number) + ":\n"s;
-        msg += m_line;
-        for (size_t i = 2; i <= m_char_pos; ++i){
-            msg += " "s;
-        }
-        msg += "^";
-        return msg.c_str();
+        return ("Ожидалось:  "s +  m_msg.c_str() + "\n" + m_context_msg).c_str();
     }
 private:
-    const std::string m_line;
-    const size_t m_line_number;
-    const size_t m_char_pos;
+    std::string m_context_msg;
 };
 
 enum class Lex{

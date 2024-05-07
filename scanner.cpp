@@ -175,10 +175,15 @@ void Scanner::load_state(){
     states.pop();
 }
 
+
+void Scanner::delete_state(){
+    states.pop();
+}
+
 void Scanner::check(char c){
     using namespace std::string_literals;
     if (wrap->current_state.ch != c){
-        throw ExpectedLexException{""s + c, wrap->current_state.line, wrap->current_state.line_number, wrap->current_state.symbol_number_in_line};
+        throw ExpectedLexException{""s + c, get_line_for_compiler_msg()};
     }
     wrap->get_next();
 }
@@ -237,8 +242,7 @@ void Scanner::ident(){
         current_state.lex = lexIdent[str_value];
     }
     NameTableEntryType nameTableEntryType = NameTableEntryType::ScopeClose;
-    if (name_table.has_name_in_this_scope(str_value, nameTableEntryType)){
-        std::cout << "VOV1\n";
+    if (name_table.has_name_in_this_scopes(str_value, nameTableEntryType)){
         if (nameTableEntryType == NameTableEntryType::TypeName){
             current_state.lex = Lex::UserDefinedType;
         }
@@ -271,7 +275,7 @@ void Scanner::char_literal(){
     using namespace std::string_literals;
     wrap->get_next();
     if (!ScanWrapper::is_alpha(wrap->current_state.ch)){
-        throw ExpectedLexException{"символ"s, wrap->current_state.line, wrap->current_state.line_number, wrap->current_state.symbol_number_in_line};
+        throw ExpectedLexException{"символ\n"s, get_line_for_compiler_msg()};
     }
     if (wrap->current_state.ch == '\\'){
         current_state.value = backslash_symbol();

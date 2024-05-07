@@ -17,47 +17,39 @@ void NameTable::close_scope(){
     entries.push_back(new_entry);
 }
 
-
-bool NameTable::has_name(const std::string& name){
-    for (const auto& entry:entries){
-        if (entry.name == name){
-            return true;
-        }
-    }
-    return false;
+bool NameTable::has_name_in_this_scopes(const std::string& name){
+    NameTableEntryType entryType = NameTableEntryType::ScopeClose;
+    return has_name_in_this_scopes(name, entryType);
 }
 
 
-bool NameTable::has_name_in_this_scope(const std::string& name){
-    NameTableEntryType nameTableEntryType = NameTableEntryType::ScopeClose;
-    return has_name_in_this_scope(name, nameTableEntryType);
-}
-
-
-bool NameTable::has_name_in_this_scope(const std::string& name, NameTableEntryType& nameTableEntryType)
+bool NameTable::has_name_in_this_scopes(const std::string& name, NameTableEntryType& nameTableEntryType)
 {
     if (entries.size() == 0){
         return false;
     }
     auto iter = entries.end();
-    --iter;
-    std::cout << iter->name << "\n";
-    while (iter != entries.begin() && iter->entry_type != NameTableEntryType::ScopeOpen){
+    iter--;
+    while (iter != entries.begin() && iter->name != name){
         if (iter->entry_type == NameTableEntryType::ScopeClose){
-            while (iter != entries.begin() && iter->entry_type != NameTableEntryType::ScopeOpen){
-                --iter;
-            }
-            if (iter == entries.begin()){
-                return false;
+            int scopes_count = 1;
+            iter--;
+            while (iter != entries.begin() && scopes_count != 0){
+                if (iter->entry_type == NameTableEntryType::ScopeClose){
+                    scopes_count++;
+                } else if (iter->entry_type == NameTableEntryType::ScopeOpen){
+                    scopes_count--;
+                }
+                iter--;
             }
         } else {
             if (iter->name == name){
-                nameTableEntryType = iter->entry_type;
                 return true;
             }
+            iter--;
         }
-        --iter;
     }
+    // первая запись должна быть OpenScope
     return false;
 }
 

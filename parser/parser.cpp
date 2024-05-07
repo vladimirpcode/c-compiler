@@ -1,9 +1,9 @@
 #include "parser.h"
 
-#include "scanner.h"
+#include "../scanner.h"
 #include <string>
 #include <iostream>
-#include "name_table.h"
+#include "../name_table.h"
 #include "parser_external_definitions.h"
 
 using namespace std::string_literals;

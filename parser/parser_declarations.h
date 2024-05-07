@@ -21,7 +21,7 @@ void parse_enumerator_list(Scanner& scan);
 void parse_enumerator(Scanner& scan);
 void parse_type_qualifier(Scanner& scan);
 void parse_function_specifier(Scanner& scan);
-void parse_declartor(Scanner& scan);
+void parse_declarator(Scanner& scan);
 void parse_direct_declartor(Scanner& scan);
 void parse_pointer(Scanner& scan);
 void parse_type_qualifier_list(Scanner& scan);
