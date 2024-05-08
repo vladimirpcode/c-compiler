@@ -96,6 +96,18 @@ Lex Scanner::get_next(){
             current_state.lex = Lex::LessEqualThen;
             wrap->get_next();
         }
+    } else if (wrap->current_state.ch == '.'){
+        current_state.lex = Lex::Dot;
+        wrap->get_next();
+        if (wrap->current_state.ch == '.'){
+            wrap->get_next();
+            if (wrap->current_state.ch == '.'){
+                current_state.lex = Lex::TripleDot;
+                wrap->get_next();
+            } else {
+                wrap->previous();
+            }
+        }
     } else{
         switch (wrap->current_state.ch){
             case ScanWrapper::EOT:
@@ -128,9 +140,6 @@ Lex Scanner::get_next(){
             case ';':
                 current_state.lex = Lex::SemiColon;
                 break;
-            case '.':
-                current_state.lex = Lex::Dot;
-                break;
             case ',':
                 current_state.lex = Lex::Comma;
                 break;
@@ -153,7 +162,7 @@ Lex Scanner::get_next(){
 
 std::string Scanner::get_line_for_compiler_msg() const{
     std::string result = std::to_string(wrap->current_state.line_number) + ") "s + wrap->current_state.line + "\n"s;
-    for (int i = 0; i < std::to_string(wrap->current_state.line_number).size() + 2 + wrap->current_state.symbol_number_in_line; ++i){
+    for (int i = 0; i < std::to_string(wrap->current_state.line_number).size() + 1 + wrap->current_state.symbol_number_in_line; ++i){
         result += " "s;
     }
     result += "^"s;
@@ -245,6 +254,8 @@ void Scanner::ident(){
     if (name_table.has_name_in_this_scopes(str_value, nameTableEntryType)){
         if (nameTableEntryType == NameTableEntryType::TypeName){
             current_state.lex = Lex::UserDefinedType;
+        } else if (nameTableEntryType == NameTableEntryType::EnumConst){
+            current_state.lex = Lex::EnumConstant;
         }
     }
 }
@@ -386,7 +397,6 @@ std::string to_string(Lex lex){
     lexStr[Lex::AssigmentAnd] = "&="s;
     lexStr[Lex::AssigmentXor] = "^="s;
     lexStr[Lex::AssigmentOr] = "|="s;
-    lexStr[Lex::And] = "&"s;
     lexStr[Lex::Asterisk] = "*"s;
     lexStr[Lex::Plus] = "+"s;
     lexStr[Lex::Minus] = "-"s;

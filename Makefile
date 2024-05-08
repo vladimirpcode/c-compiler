@@ -18,12 +18,14 @@ parser/parser_external_definitions.o: parser/parser_external_definitions.cpp par
 	g++ parser/parser_external_definitions.cpp -c -o parser/parser_external_definitions.o
 parser/try_parse.o: parser/try_parse.cpp parser/try_parse.h
 	g++ parser/try_parse.cpp -c -o parser/try_parse.o
+parser/parser_others.o: parser/parser_others.cpp parser/parser_others.h
+	g++ parser/parser_others.cpp -c -o parser/parser_others.o
 name_table.o: name_table.cpp name_table.h
 	g++ name_table.cpp -c
 
 all: main.o scanner.o scan_wrapper.o converter.o parser/parser.o parser/parser_expressions.o \
 			parser/parser_declarations.o parser/parser_statements.o parser/parser_external_definitions.o \
-			name_table.o parser/try_parse.o
+			name_table.o parser/try_parse.o parser/parser_others.o
 	g++ main.o \
 		scanner.o \
 		scan_wrapper.o \
@@ -35,6 +37,7 @@ all: main.o scanner.o scan_wrapper.o converter.o parser/parser.o parser/parser_e
 		parser/parser_statements.o \
 		parser/parser_external_definitions.o \
 		parser/try_parse.o \
+		parser/parser_others.o \
 		-o app
 clean:
 	rm  app \
@@ -49,3 +52,5 @@ clean:
 		parser/parser_statements.o \
 		parser/parser_external_definitions.o \
 		parser/try_parse.o \
+		parser/parser_others.o \
+

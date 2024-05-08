@@ -1,11 +1,17 @@
 #include "try_parse.h"
 
-bool try_parse(parsing_function func, Scanner scan){
+#include "../scanner.h"
+#include <iostream>
+
+bool try_parse(parsing_function func, Scanner& scan){
     try{
         scan.save_state();
         func(scan);
         scan.delete_state();
-    } catch (std::exception* e){
+        return true;
+    } catch (std::exception e){
         scan.load_state();
+        return false;
     }
+    return true;
 }

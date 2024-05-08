@@ -16,6 +16,8 @@ int main(){
         std::cout << "OK\n";
     } catch (ParsingException e){
         std::cout << e.what() << "\n";
+    } catch (ExpectedLexException e){
+        std::cout << e.what() << "\n";
     } catch (std::exception e){
         std::cout << "неизвестная ошибка парсинга\n";
     }

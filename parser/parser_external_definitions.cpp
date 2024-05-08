@@ -4,6 +4,7 @@
 #include "parser_statements.h"
 #include "parser_declarations.h"
 #include "try_parse.h"
+#include <iostream>
 
 void parse_translation_unit(Scanner& scan){
     parse_external_declaration(scan);

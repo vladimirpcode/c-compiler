@@ -6,7 +6,8 @@
 
 enum class NameTableEntryType{
     TypeName,
-    VarOrConst,
+    Variable,
+    EnumConst,
     Function,
     ScopeOpen,
     ScopeClose

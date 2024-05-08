@@ -1,6 +1,9 @@
 #include "parser_declarations.h"
 
 #include "try_parse.h"
+#include "parser_expressions.h"
+#include "parser_others.h"
+#include <iostream>
 
 void parse_declaration(Scanner& scan){
     parse_declaration_specifiers(scan);
@@ -10,22 +13,30 @@ void parse_declaration(Scanner& scan){
 
 void parse_declaration_specifiers(Scanner& scan){
     if (try_parse(parse_storage_class_specifier, scan)){
-        try_parse(parse_declaration_specifiers, scan);
-        return;
+        
+    } else if (try_parse(parse_type_specifier, scan)){
+
+    } else if (try_parse(parse_type_qualifier, scan)){
+        
+    } else if (try_parse(parse_function_specifier, scan)){
+
+    } else {
+        throw ExpectedLexException("declaration specifiers", scan.get_line_for_compiler_msg());
     }
-    if (try_parse(parse_type_specifier, scan)){
-        try_parse(parse_declaration_specifiers, scan);
-        return;
+    while (scan.current_state.lex != Lex::EOT){
+        if (try_parse(parse_storage_class_specifier, scan)){
+        
+        } else if (try_parse(parse_type_specifier, scan)){
+
+        } else if (try_parse(parse_type_qualifier, scan)){
+            
+        } else if (try_parse(parse_function_specifier, scan)){
+
+        } else {
+            break;
+        }
     }
-    if (try_parse(parse_type_qualifier, scan)){
-        try_parse(parse_declaration_specifiers, scan);
-        return;
-    }
-    if (try_parse(parse_function_specifier, scan)){
-        try_parse(parse_declaration_specifiers, scan);
-        return;
-    }
-    throw ExpectedLexException("declaration specifiers", scan.get_line_for_compiler_msg());
+    
 }
 void parse_init_declarator_list(Scanner& scan){
     parse_init_declarator(scan);
@@ -141,93 +152,254 @@ void parse_struct_declarator_list(Scanner& scan){
 
 void parse_struct_declarator(Scanner& scan){
     bool parsed_declarator = try_parse(parse_declarator, scan);
-    //ToDo
+    if (!parsed_declarator && scan.current_state.lex != Lex::Colon){
+        throw ExpectedLexException("struct declarator", scan.get_line_for_compiler_msg());
+    }
+    if (scan.current_state.lex == Lex::Colon){
+        scan.get_next();
+        parse_constant_expression(scan);
+    }
 }
 
 void parse_enum_specifier(Scanner& scan){
-
+    check(scan, Lex::Enum);
+    bool identifier_parsed = try_parse(parse_identifier, scan);
+    if (!identifier_parsed && scan.current_state.lex != Lex::LCurlyBrace){
+        throw ExpectedLexException("enum specifier", scan.get_line_for_compiler_msg());
+    }
+    if (scan.current_state.lex == Lex::LCurlyBrace){
+        scan.get_next();
+        parse_enumerator_list(scan);
+        if (scan.current_state.lex == Lex::Comma){
+            scan.get_next();
+        }
+        check(scan, Lex::RCurlyBrace);
+    }
 }
 
 void parse_enumerator_list(Scanner& scan){
-
+    parse_enumerator(scan);
+    while (scan.current_state.lex == Lex::Comma){
+        scan.get_next();
+        parse_enumerator(scan);
+    }
 }
 
 void parse_enumerator(Scanner& scan){
-
+    parse_enumeration_constant(scan);
+    if (scan.current_state.lex == Lex::Assigment){
+        scan.get_next();
+        parse_constant_expression(scan);
+    }
 }
 
 void parse_type_qualifier(Scanner& scan){
-
+    if (scan.current_state.lex == Lex::Const
+        || scan.current_state.lex == Lex::Restrict
+        || scan.current_state.lex == Lex::Volatile)
+    {
+        scan.get_next();
+    } else {
+        throw ExpectedLexException("type qualifier", scan.get_line_for_compiler_msg());
+    }
 }
 
 void parse_function_specifier(Scanner& scan){
-
+    if (scan.current_state.lex == Lex::Inline)
+    {
+        scan.get_next();
+    } else {
+        throw ExpectedLexException("function specifier", scan.get_line_for_compiler_msg());
+    }
 }
 
 void parse_declarator(Scanner& scan){
-
+    try_parse(parse_pointer, scan);
+    parse_direct_declartor(scan);
 }
 
 void parse_direct_declartor(Scanner& scan){
+    if (scan.current_state.lex == Lex::LBrace){
+        scan.get_next();
+        parse_declarator(scan);
+        check(scan, Lex::RBrace);
+    } else {
+        parse_identifier(scan);
+    }
+    while (scan.current_state.lex == Lex::LBrace || scan.current_state.lex == Lex::LSquareBrace){
+        if (scan.current_state.lex == Lex::LBrace){
+            scan.get_next();
+            if (try_parse(parse_parameter_list, scan)){
 
+            } else {
+                try_parse(parse_identifier_list, scan);
+            }
+            check(scan, Lex::RBrace);
+        } else {
+            scan.get_next();
+            if (scan.current_state.lex == Lex::Static){
+                scan.get_next();
+                try_parse(parse_type_qualifier_list, scan);
+                parse_assignment_expression(scan);
+            } else {
+                bool type_qualifier_list_parsed = try_parse(parse_type_qualifier_list, scan);
+                if (type_qualifier_list_parsed && scan.current_state.lex == Lex::Static){
+                    scan.get_next();
+                    parse_assignment_expression(scan);
+                } else if (scan.current_state.lex == Lex::Asterisk){
+                    scan.get_next();
+                } else {
+                    try_parse(parse_assignment_expression, scan);
+                }
+            }
+            check(scan, Lex::RSquareBrace);
+        }
+    }
 }
 
 void parse_pointer(Scanner& scan){
-
+    check(scan, Lex::Asterisk);
+    try_parse(parse_type_qualifier_list, scan);
+    while (scan.current_state.lex == Lex::Asterisk){
+        scan.get_next();
+        try_parse(parse_type_qualifier_list, scan);
+    }
 }
 
 void parse_type_qualifier_list(Scanner& scan){
+    parse_type_qualifier(scan);
+    while (try_parse(parse_type_qualifier, scan)){
 
+    }
 }
 
 void parse_parameter_type_list(Scanner& scan){
-
+    parse_parameter_list(scan);
+    if (scan.current_state.lex == Lex::Comma){
+        scan.get_next();
+        check(scan, Lex::TripleDot);
+    }
 }
 
 void parse_parameter_list(Scanner& scan){
-
+    parse_parameter_declaration(scan);
+    while (scan.current_state.lex == Lex::Comma){
+        scan.get_next();
+        parse_parameter_declaration(scan);
+    }
 }
 
 void parse_parameter_declaration(Scanner& scan){
-
+    parse_declaration_specifiers(scan);
+    if (try_parse(parse_declarator, scan)){
+        return;
+    }
+    try_parse(parse_abstract_declarator, scan);
 }
 
 void parse_identifier_list(Scanner& scan){
-
+    parse_identifier(scan);
+    while (scan.current_state.lex == Lex::Comma){
+        scan.get_next();
+        parse_identifier(scan);
+    }
 }
 
 void parse_type_name(Scanner& scan){
-
+    parse_specifier_qualifier_list(scan);
+    try_parse(parse_abstract_declarator, scan);
 }
 
 void parse_abstract_declarator(Scanner& scan){
+    bool parsed_pointer = try_parse(parse_pointer, scan);
+    if (!parsed_pointer){
+        parse_direct_abstract_declarator(scan);
+    } else {
+        try_parse(parse_direct_abstract_declarator, scan);
+    }
 
 }
 
 void parse_direct_abstract_declarator(Scanner& scan){
-
+    check(scan, Lex::LBrace);
+    parse_abstract_declarator(scan);
+    check(scan, Lex::RBrace);
+    bool aborted = false;
+    while (scan.current_state.lex == Lex::LBrace){
+        scan.get_next();
+        if (!try_parse(parse_abstract_declarator, scan)){
+            aborted = true;
+            break;
+        }
+        check(scan, Lex::RBrace);
+    }
+    if (aborted){
+        try_parse(parse_parameter_type_list, scan);
+        check(scan, Lex::RBrace);
+    }
+    while (scan.current_state.lex == Lex::LBrace || scan.current_state.lex == Lex::LSquareBrace){
+        if (scan.current_state.lex == Lex::LBrace){
+            scan.get_next();
+            try_parse(parse_parameter_type_list, scan);
+            check(scan, Lex::RBrace);
+        } else {
+            scan.get_next();
+            if (scan.current_state.lex == Lex::Asterisk){
+                scan.get_next();
+            } else {
+                try_parse(parse_assignment_expression, scan);
+            }
+            check(scan, Lex::RSquareBrace);
+        }
+    }
 }
 
 void parse_typedef_name(Scanner& scan){
-
+    check(scan, Lex::UserDefinedType);
 }
 
 void parse_initializer(Scanner& scan){
-
+    if (scan.current_state.lex == Lex::LCurlyBrace){
+        scan.get_next();
+        parse_initializer_list(scan);
+        if (scan.current_state.lex == Lex::Comma){
+            scan.get_next();
+        }
+        check(scan, Lex::RCurlyBrace);
+    } else {
+        parse_assignment_expression(scan);
+    }
 }
 
 void parse_initializer_list(Scanner& scan){
-
+    try_parse(parse_designation, scan);
+    parse_initializer(scan);
+    while (scan.current_state.lex == Lex::Comma){
+        scan.get_next();
+        try_parse(parse_designation, scan);
+        parse_initializer(scan);
+    }
 }
 
 void parse_designation(Scanner& scan){
-
+    parse_designator_list(scan);
+    check(scan, Lex::Assigment);
 }
 
 void parse_designator_list(Scanner& scan){
+    parse_designator(scan);
+    while (try_parse(parse_designator, scan)){
 
+    }
 }
 
 void parse_designator(Scanner& scan){
-
+    if (scan.current_state.lex == Lex::LSquareBrace){
+        scan.get_next();
+        parse_constant_expression(scan);
+        check(scan, Lex::RSquareBrace);
+    } else {
+        check(scan, Lex::Dot);
+        parse_identifier(scan);
+    }
 }

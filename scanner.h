@@ -6,6 +6,7 @@
 #include <variant>
 #include <stack>
 #include <vector>
+#include <iostream>
 
 enum class Lex;
 
@@ -53,14 +54,18 @@ protected:
 class ExpectedLexException : public BadLexException{
 public:
     ExpectedLexException(const std::string& expected_msg, const std::string& context_msg) 
-        : BadLexException(expected_msg) {}
+        : BadLexException(expected_msg), m_context_msg(context_msg) 
+    {
+        using namespace std::string_literals;
+        m_what_msg = ("Ожидалось:  "s +  m_msg.c_str() + "\n" + m_context_msg);
+    }
 
     virtual const char* what() const noexcept override{
-        using namespace std::string_literals;
-        return ("Ожидалось:  "s +  m_msg.c_str() + "\n" + m_context_msg).c_str();
+        return m_what_msg.c_str();
     }
 private:
     std::string m_context_msg;
+    std::string m_what_msg;
 };
 
 enum class Lex{
@@ -70,9 +75,11 @@ enum class Lex{
     Ident,
     IntLiteral,
     FloatLiteral,
+    EnumConstant,
 
     Comma, // ,
     Dot, // .
+    TripleDot, // ...
     Assigment,  // =
     AssigmentMultiply, // *=
     AssigmentDivide, // /=
@@ -86,7 +93,6 @@ enum class Lex{
     AssigmentOr, // |=
     Compare, // ==
     CompareNegative, // !=
-    And, // &
     Asterisk, // *
     Plus,
     Minus,
