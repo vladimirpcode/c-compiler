@@ -1,5 +1,7 @@
 #include "scan_wrapper.h"
 
+#include <iostream>
+
 ScanWrapper::ScanWrapper(const std::string& str) 
     : data(str)
 {
@@ -57,6 +59,14 @@ void ScanWrapper::load_state(){
         throw std::exception();
     }
     current_state = states.top();
+    states.pop();
+}
+
+
+void ScanWrapper::delete_state(){
+    if (states.size() == 0){
+        throw std::exception();
+    }
     states.pop();
 }
 

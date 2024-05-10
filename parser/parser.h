@@ -2,6 +2,7 @@
 
 #include <string>
 #include "../scanner.h"
+#include "cstdio"
 
 void parse(const std::string& translation_unit_text);
 void check(Scanner& scan, Lex lex);
@@ -27,3 +28,10 @@ public:
     Lex operation_or_value_type;
     LexerValue value;
 };
+
+#define DEBUG
+#ifdef DEBUG
+#define DEBUG_PRINT(s) (printf(s))
+#else 
+#define DEBUG_PRINT(s)
+#endif

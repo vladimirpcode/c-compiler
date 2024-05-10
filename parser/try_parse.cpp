@@ -12,6 +12,9 @@ bool try_parse(parsing_function func, Scanner& scan){
     } catch (std::exception e){
         scan.load_state();
         return false;
+    } catch (ExpectedLexException e){
+        scan.load_state();
+        return false;
     }
     return true;
 }

@@ -36,6 +36,9 @@ Lex Scanner::get_next(){
         if (wrap->current_state.ch == '+'){
             current_state.lex = Lex::Increment;
             wrap->get_next();
+        } else if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::AssigmentPlus;
+            wrap->get_next();
         }
     } else if (wrap->current_state.ch == '-'){
         current_state.lex = Lex::Minus;
@@ -45,6 +48,9 @@ Lex Scanner::get_next(){
             wrap->get_next();
         } else if (wrap->current_state.ch == '>'){
             current_state.lex = Lex::Arrow;
+            wrap->get_next();
+        } else if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::AssigmentPlus;
             wrap->get_next();
         }
     } else if (wrap->current_state.ch == '/'){
@@ -60,12 +66,18 @@ Lex Scanner::get_next(){
         if (wrap->current_state.ch == '|'){
             current_state.lex = Lex::LogicalOr;
             wrap->get_next();
+        } else if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::AssigmentOr;
+            wrap->get_next();
         }
     } else if (wrap->current_state.ch == '&'){
         current_state.lex = Lex::BitwiseAnd;
         wrap->get_next();
         if (wrap->current_state.ch == '&'){
             current_state.lex = Lex::LogicalAnd;
+            wrap->get_next();
+        } else if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::AssigmentAnd;
             wrap->get_next();
         }
     } else if (wrap->current_state.ch == '='){
@@ -88,6 +100,13 @@ Lex Scanner::get_next(){
         if (wrap->current_state.ch == '='){
             current_state.lex = Lex::GreaterEqualThen;
             wrap->get_next();
+        } else if (wrap->current_state.ch == '>'){
+            current_state.lex = Lex::RightShift;
+            wrap->get_next();
+            if (wrap->current_state.ch == '='){
+                current_state.lex = Lex::AssigmentRightShift;
+                wrap->get_next();
+            }
         }
     } else if (wrap->current_state.ch == '<'){
         current_state.lex = Lex::LessThen;
@@ -95,6 +114,13 @@ Lex Scanner::get_next(){
         if (wrap->current_state.ch == '='){
             current_state.lex = Lex::LessEqualThen;
             wrap->get_next();
+        } else if (wrap->current_state.ch == '<'){
+            current_state.lex = Lex::LeftShift;
+            wrap->get_next();
+            if (wrap->current_state.ch == '='){
+                current_state.lex = Lex::AssigmentLeftShift;
+                wrap->get_next();
+            }
         }
     } else if (wrap->current_state.ch == '.'){
         current_state.lex = Lex::Dot;
@@ -107,6 +133,27 @@ Lex Scanner::get_next(){
             } else {
                 wrap->previous();
             }
+        }
+    } else if (wrap->current_state.ch == '*'){
+        current_state.lex = Lex::Asterisk;
+        wrap->get_next();
+        if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::AssigmentMultiply;
+            wrap->get_next();
+        }
+    } else if (wrap->current_state.ch == '%'){
+        current_state.lex = Lex::Mod;
+        wrap->get_next();
+        if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::AssigmentMod;
+            wrap->get_next();
+        }
+    } else if (wrap->current_state.ch == '^'){
+        current_state.lex = Lex::Xor;
+        wrap->get_next();
+        if (wrap->current_state.ch == '='){
+            current_state.lex = Lex::AssigmentXor;
+            wrap->get_next();
         }
     } else{
         switch (wrap->current_state.ch){
@@ -131,9 +178,6 @@ Lex Scanner::get_next(){
             case ']':
                 current_state.lex = Lex::RSquareBrace;
                 break;
-            case '*':
-                current_state.lex = Lex::Asterisk;
-                break;
             case ':':
                 current_state.lex = Lex::Colon;
                 break;
@@ -143,22 +187,15 @@ Lex Scanner::get_next(){
             case ',':
                 current_state.lex = Lex::Comma;
                 break;
-            case '^':
-                current_state.lex = Lex::Xor;
-                break;
             case '?':
                 current_state.lex = Lex::QuestionMark;
-                break;
-            case '%':
-                current_state.lex = Lex::Mod;
                 break;
         }
         wrap->get_next();
     }
-
+    std::cout << "Scanner: " << to_string(current_state.lex) << "\n";
     return current_state.lex;
 }
-
 
 std::string Scanner::get_line_for_compiler_msg() const{
     std::string result = std::to_string(wrap->current_state.line_number) + ") "s + wrap->current_state.line + "\n"s;
@@ -186,6 +223,7 @@ void Scanner::load_state(){
 
 
 void Scanner::delete_state(){
+    wrap->delete_state();
     states.pop();
 }
 
@@ -378,6 +416,8 @@ void Scanner::skip_comments(){
 std::string to_string(Lex lex){
     using namespace std::string_literals;
     std::map<Lex, std::string> lexStr;
+    lexStr[Lex::EnumConstant] = "Enum константа"s;
+    lexStr[Lex::TripleDot] = "..."s;
     lexStr[Lex::EOT] = "конец текста"s;
     lexStr[Lex::StringLiteral] = "строковый литерал"s;
     lexStr[Lex::CharLiteral] = "символьный литерал"s;

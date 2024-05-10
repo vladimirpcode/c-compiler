@@ -42,7 +42,9 @@ private:
 
 class BadLexException : public std::exception{
 public:
-    BadLexException(const std::string& msg) : m_msg(msg){}
+    BadLexException(const std::string& msg) : m_msg(msg){
+        
+    }
 
     virtual const char* what() const noexcept override{
         return m_msg.c_str();

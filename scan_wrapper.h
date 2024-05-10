@@ -26,6 +26,7 @@ public:
     void skip_CRLF();
     void save_state();
     void load_state();
+    void delete_state();
 
     static bool is_alpha(char c);
     static bool is_number(char c);
