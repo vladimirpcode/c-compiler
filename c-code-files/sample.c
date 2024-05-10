@@ -4,6 +4,11 @@ float d(){
     return 0;
 }
 
+struct S{
+    int a;
+    int b;
+};
+
 int main(void)
 {
     float *c = malloc(sizeof(float));

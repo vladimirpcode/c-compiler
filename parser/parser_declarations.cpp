@@ -128,15 +128,20 @@ void parse_struct_or_union(Scanner& scan){
 void parse_struct_declaration_list(Scanner& scan){
     DEBUG_PRINT("parse_struct_declaration_list\n");
     parse_struct_declaration(scan);
+    if (scan.current_state.lex == Lex::RCurlyBrace){
+        return;
+    }
     while (try_parse(parse_struct_declaration, scan)){
-
+        if (scan.current_state.lex == Lex::RCurlyBrace){
+            return;
+        }
     }
 }
 
 void parse_struct_declaration(Scanner& scan){
     DEBUG_PRINT("parse_struct_declaration\n");
     parse_specifier_qualifier_list(scan);
-    parse_struct_declaration_list(scan);
+    parse_struct_declarator_list(scan);
     check(scan, Lex::SemiColon);
 }
 
