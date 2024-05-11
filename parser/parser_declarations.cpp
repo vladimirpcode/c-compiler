@@ -5,6 +5,7 @@
 #include "parser_others.h"
 #include <iostream>
 #include "parser.h"
+#include "../name_table.h"
 
 void parse_declaration(Scanner& scan){
     DEBUG_PRINT("parse_declaration\n");
@@ -106,6 +107,8 @@ void parse_struct_or_union_specifier(Scanner& scan){
     if (!identifier_parsed && scan.current_state.lex != Lex::LCurlyBrace){
         throw ExpectedLexException("{ struct-declaration-list }", scan.get_line_for_compiler_msg());
     } else {
+        scan.save_state();
+        //ToDo nametable
         if (scan.current_state.lex == Lex::LCurlyBrace){
             check(scan, Lex::LCurlyBrace);
             parse_struct_declaration_list(scan);

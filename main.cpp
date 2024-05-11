@@ -13,7 +13,10 @@ int main(){
     buffer << fin.rdbuf();
     try{
         parse(buffer.str());
-        std::cout << "OK\n";
+        std::cout << "\n\n";
+        std::cout << "#######################\n";
+        std::cout << "####### УСПЕШНО #######\n";
+        std::cout << "#######################\n";
     } catch (ParsingException e){
         std::cout << e.what() << "\n";
     } catch (ExpectedLexException e){

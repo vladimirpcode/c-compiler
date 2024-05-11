@@ -40,6 +40,7 @@ private:
     void skip_comments();
 };
 
+
 class BadLexException : public std::exception{
 public:
     BadLexException(const std::string& msg) : m_msg(msg){

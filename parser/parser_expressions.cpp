@@ -50,6 +50,7 @@ void parse_postfix_expression(Scanner& scan){
         if (scan.current_state.lex == Lex::Decrement || scan.current_state.lex == Lex::Increment){
             scan.get_next();
         } else if (scan.current_state.lex == Lex::Dot || scan.current_state.lex == Lex::Arrow){
+            scan.get_next();
             parse_identifier(scan);
         } else if (scan.current_state.lex == Lex::LSquareBrace){
             scan.get_next();

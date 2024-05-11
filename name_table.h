@@ -40,15 +40,22 @@ struct NameTableEntry{
     bool is_mutable;
 };
 
+struct NameTableState{
+    std::vector<NameTableEntry> entries;
+};
+
 class NameTable{
 public:
-    std::vector<NameTableEntry> entries;
-
+    NameTableState current_state;
+    std::stack<NameTableState> states; 
     void open_scope();
     void close_scope();
     bool has_name_in_this_scopes(const std::string& name);
     bool has_name_in_this_scopes(const std::string& name, NameTableEntryType& nameTableEntryType);
     void add_name(std::string name, NameTableEntryType entry_type, PrimitiveType value_type, NameTableValue value, bool is_mutable);
+    void save_state();
+    void load_state();
+    void delete_state();
 };
 
 static NameTable name_table;

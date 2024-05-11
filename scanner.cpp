@@ -209,6 +209,7 @@ std::string Scanner::get_line_for_compiler_msg() const{
 
 void Scanner::save_state(){
     wrap->save_state();
+    name_table.save_state();
     states.push(current_state);
 }
 
@@ -217,6 +218,7 @@ void Scanner::load_state(){
         throw std::exception();
     }
     wrap->load_state();
+    name_table.load_state();
     current_state = states.top();
     states.pop();
 }
@@ -224,6 +226,7 @@ void Scanner::load_state(){
 
 void Scanner::delete_state(){
     wrap->delete_state();
+    name_table.delete_state();
     states.pop();
 }
 
