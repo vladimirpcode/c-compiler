@@ -27,7 +27,7 @@ void check(Scanner& scan, Lex lex){
 void parse(const std::string& translation_unit_text){
     Scanner scan(translation_unit_text);
     // глобальная область видимость
-    name_table.entries.clear(); //ToDo отрефакторить, определить где лежать таблице имен
+    name_table.current_state.entries.clear(); //ToDo отрефакторить, определить где лежать таблице имен
     name_table.open_scope();
     
     parse_translation_unit(scan);

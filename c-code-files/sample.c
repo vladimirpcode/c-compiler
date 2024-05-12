@@ -12,6 +12,6 @@ struct S{
 int main(void)
 {
     float *c = malloc(sizeof(float));
-    S s;
+    //S s;
     s->a;
 }
