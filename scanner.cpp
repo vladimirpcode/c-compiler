@@ -284,7 +284,7 @@ void Scanner::ident(){
     lexIdent["unsigned"] = Lex::Unsigned;
     lexIdent["void"] = Lex::Void;
     lexIdent["volatile"] = Lex::Auto;
-    lexIdent["while"] = Lex::Break;
+    lexIdent["while"] = Lex::While;
     lexIdent["_Bool"] = Lex::Bool_;
     lexIdent["_Complex"] = Lex::Complex_;
     lexIdent["_Imaginary"] = Lex::Imaginary_;
@@ -326,9 +326,6 @@ void Scanner::number(){
 void Scanner::char_literal(){
     using namespace std::string_literals;
     wrap->get_next();
-    if (!ScanWrapper::is_alpha(wrap->current_state.ch)){
-        throw ExpectedLexException{"символ\n"s, get_line_for_compiler_msg()};
-    }
     if (wrap->current_state.ch == '\\'){
         current_state.value = backslash_symbol();
     } else {
@@ -344,7 +341,7 @@ void Scanner::string_literal(){
     using namespace std::string_literals;
     wrap->get_next();
     std::string str_value = ""s;
-    while(ScanWrapper::is_alpha(wrap->current_state.ch)){
+    while(wrap->current_state.ch != '"'){
         if (wrap->current_state.ch == '\\'){
             str_value += backslash_symbol();
         } else {
@@ -468,6 +465,7 @@ std::string to_string(Lex lex){
     lexStr[Lex::RightShift] = ">>"s;
     lexStr[Lex::Mod] = "%"s;
     lexStr[Lex::Arrow] = "->"s;
+    lexStr[Lex::Increment] = "++"s;
     //ключевые слова
     lexStr[Lex::Auto] = "auto"s;
     lexStr[Lex::Break] = "break"s;

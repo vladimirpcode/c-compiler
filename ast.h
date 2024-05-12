@@ -26,10 +26,12 @@ enum class Operation{
     PrefixDecrement,
     PointerDereference,
     FunctionCall,
+    None
 };
 
 class AST{
 public:
+    AST();
     AST *left;
     AST *right;
     LexerValue value;

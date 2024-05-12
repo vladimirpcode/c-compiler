@@ -26,7 +26,9 @@ void parse_statement(Scanner& scan){
 
 void parse_labeled_statement(Scanner& scan){
     DEBUG_PRINT("parse_labeled_statement\n");
+    std::cout << "DBG: " << to_string(scan.current_state.lex) << "\n\n";
     if (scan.current_state.lex == Lex::Case){
+        std::cout << "sad: " << to_string(scan.current_state.lex) << "\n\n";
         scan.get_next();
         parse_constant_expression(scan);
         check(scan, Lex::Colon);
