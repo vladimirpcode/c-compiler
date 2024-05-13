@@ -3,7 +3,7 @@
 #include "../scanner.h"
 #include <iostream>
 
-bool try_parse(parsing_function func, Scanner& scan){
+bool try_parse(parsing_function func, Scanner& scan, AST*&){
     try{
         scan.save_state();
         func(scan);

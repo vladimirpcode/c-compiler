@@ -3,6 +3,7 @@
 #include <string>
 #include "../scanner.h"
 #include "cstdio"
+#include "../ast.h"
 
 void parse(const std::string& translation_unit_text);
 void check(Scanner& scan, Lex lex);

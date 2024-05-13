@@ -5,7 +5,7 @@
 #include "parser_expressions.h"
 #include "parser_declarations.h"
 
-void parse_statement(Scanner& scan){
+void parse_statement(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_statement\n");
     if (try_parse(parse_labeled_statement, scan)){
 
@@ -24,7 +24,7 @@ void parse_statement(Scanner& scan){
     }
 }
 
-void parse_labeled_statement(Scanner& scan){
+void parse_labeled_statement(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_labeled_statement\n");
     std::cout << "DBG: " << to_string(scan.current_state.lex) << "\n\n";
     if (scan.current_state.lex == Lex::Case){
@@ -44,14 +44,14 @@ void parse_labeled_statement(Scanner& scan){
     }
 }
 
-void parse_compound_statement(Scanner& scan){
+void parse_compound_statement(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_compound_statement\n");
     check(scan, Lex::LCurlyBrace);
     try_parse(parse_block_item_list, scan);
     check(scan, Lex::RCurlyBrace);
 }
 
-void parse_block_item_list(Scanner& scan){
+void parse_block_item_list(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_block_item_list\n");
     parse_block_item(scan);
     if (scan.current_state.lex == Lex::RCurlyBrace){
@@ -66,7 +66,7 @@ void parse_block_item_list(Scanner& scan){
     }
 }
 
-void parse_block_item(Scanner& scan){
+void parse_block_item(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_block_item\n");
     if (try_parse(parse_declaration, scan)){
         
@@ -75,13 +75,13 @@ void parse_block_item(Scanner& scan){
     }
 }
 
-void parse_expression_statement(Scanner& scan){
+void parse_expression_statement(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_expression_statement\n");
     try_parse(parse_expression, scan);
     check(scan, Lex::SemiColon);
 }
 
-void parse_selection_statement(Scanner& scan){
+void parse_selection_statement(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_selection_statement\n");
     if (scan.current_state.lex == Lex::If){
         scan.get_next();
@@ -102,7 +102,7 @@ void parse_selection_statement(Scanner& scan){
     }
 }
 
-void parse_iteration_statement(Scanner& scan){
+void parse_iteration_statement(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_iteration_statement\n");
     if (scan.current_state.lex == Lex::While){
         scan.get_next();
@@ -139,7 +139,7 @@ void parse_iteration_statement(Scanner& scan){
     }
 }
 
-void parse_jump_statement(Scanner& scan){
+void parse_jump_statement(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_jump_statement\n");
     if (scan.current_state.lex == Lex::Goto){
         scan.get_next();

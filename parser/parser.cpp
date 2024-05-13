@@ -5,6 +5,7 @@
 #include <iostream>
 #include "../name_table.h"
 #include "parser_external_definitions.h"
+#include "../ast.h"
 
 using namespace std::string_literals;
 
@@ -29,6 +30,7 @@ void parse(const std::string& translation_unit_text){
     // глобальная область видимость
     name_table.current_state.entries.clear(); //ToDo отрефакторить, определить где лежать таблице имен
     name_table.open_scope();
-    
-    parse_translation_unit(scan);
+    AST *ast = ast_manager.get_new_ast_instance();
+    parse_translation_unit(scan, ast);
+    ast_manager.delete_all_nodes();
 }

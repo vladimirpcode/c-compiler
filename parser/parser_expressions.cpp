@@ -5,7 +5,7 @@
 #include "parser_declarations.h"
 #include <algorithm>
 
-void parse_primary_expression(Scanner& scan){
+void parse_primary_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_primary_expression\n");
     if (try_parse(parse_identifier, scan)){
 
@@ -23,7 +23,7 @@ void parse_primary_expression(Scanner& scan){
 
 }
 
-void parse_postfix_expression(Scanner& scan){
+void parse_postfix_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_postfix_expression\n");
     if (try_parse(parse_primary_expression, scan)){
         
@@ -65,7 +65,7 @@ void parse_postfix_expression(Scanner& scan){
     
 }
 
-void parse_argument_expression_list(Scanner& scan){
+void parse_argument_expression_list(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_argument_expression_list\n");
     parse_assignment_expression(scan);
     while (scan.current_state.lex == Lex::Comma){
@@ -74,7 +74,7 @@ void parse_argument_expression_list(Scanner& scan){
     }
 }
 
-void parse_unary_expression(Scanner& scan){
+void parse_unary_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_unary_expression\n");
     if (scan.current_state.lex == Lex::Increment || scan.current_state.lex == Lex::Decrement){
         scan.get_next();
@@ -100,7 +100,7 @@ void parse_unary_expression(Scanner& scan){
     }
  }
 
-void parse_unary_operator(Scanner& scan){
+void parse_unary_operator(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_unary_operator\n");
     std::vector<Lex> operations{Lex::BitwiseAnd, Lex::Asterisk, Lex::Plus, Lex::Minus, Lex::Tilde, Lex::Exclamation};
     if (std::find(operations.begin(), operations.end(), scan.current_state.lex) != operations.end()){
@@ -110,7 +110,7 @@ void parse_unary_operator(Scanner& scan){
     }
 }
 
-void parse_cast_expression(Scanner& scan){
+void parse_cast_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_cast_expression\n");
     if (scan.current_state.lex == Lex::LBrace){
         scan.get_next();
@@ -122,7 +122,7 @@ void parse_cast_expression(Scanner& scan){
     }
 }
 
-void parse_multiplicative_expression(Scanner& scan){
+void parse_multiplicative_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_multiplicative_expression\n");
     parse_cast_expression(scan);
     while (scan.current_state.lex == Lex::Asterisk
@@ -134,7 +134,7 @@ void parse_multiplicative_expression(Scanner& scan){
     }
 }
 
-void parse_additive_expression(Scanner& scan){
+void parse_additive_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_additive_expression\n");
     parse_multiplicative_expression(scan);
     while (scan.current_state.lex == Lex::Plus || scan.current_state.lex == Lex::Minus){
@@ -143,7 +143,7 @@ void parse_additive_expression(Scanner& scan){
     }
 }
 
-void parse_shift_expression(Scanner& scan){
+void parse_shift_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_shift_expression\n");
     parse_additive_expression(scan);
     while (scan.current_state.lex == Lex::LeftShift || scan.current_state.lex == Lex::RightShift){
@@ -152,7 +152,7 @@ void parse_shift_expression(Scanner& scan){
     }
 }
 
-void parse_relational_expression(Scanner& scan){
+void parse_relational_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_relational_expression\n");
     parse_shift_expression(scan);
     while (scan.current_state.lex == Lex::GreaterThen
@@ -165,7 +165,7 @@ void parse_relational_expression(Scanner& scan){
     }
 }
 
-void parse_equality_expression(Scanner& scan){
+void parse_equality_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_equality_expression\n");
     parse_relational_expression(scan);
     while (scan.current_state.lex == Lex::Compare || scan.current_state.lex == Lex::CompareNegative){
@@ -174,7 +174,7 @@ void parse_equality_expression(Scanner& scan){
     }
 }
 
-void parse_and_expression(Scanner& scan){
+void parse_and_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_and_expression\n");
     parse_equality_expression(scan);
     while (scan.current_state.lex == Lex::BitwiseAnd){
@@ -183,7 +183,7 @@ void parse_and_expression(Scanner& scan){
     }
 }
 
-void parse_exclusive_or_expression(Scanner& scan){
+void parse_exclusive_or_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_exclusive_or_expression\n");
     parse_and_expression(scan);
     while (scan.current_state.lex == Lex::Xor){
@@ -192,7 +192,7 @@ void parse_exclusive_or_expression(Scanner& scan){
     }
 }
 
-void parse_inclusive_or_expression(Scanner& scan){
+void parse_inclusive_or_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_inclusive_or_expression\n");
     parse_exclusive_or_expression(scan);
     while (scan.current_state.lex == Lex::BitwiseOr){
@@ -200,7 +200,7 @@ void parse_inclusive_or_expression(Scanner& scan){
     }
 }
 
-void parse_logical_and_expression(Scanner& scan){
+void parse_logical_and_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_logical_and_expression\n");
     parse_inclusive_or_expression(scan);
     while (scan.current_state.lex == Lex::LogicalAnd){
@@ -209,7 +209,7 @@ void parse_logical_and_expression(Scanner& scan){
     }
 }
 
-void parse_logical_or_expression(Scanner& scan){
+void parse_logical_or_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_logical_or_expression\n");
     parse_logical_and_expression(scan);
     while (scan.current_state.lex == Lex::LogicalOr){
@@ -218,7 +218,7 @@ void parse_logical_or_expression(Scanner& scan){
     }
 }
 
-void parse_conditional_expression(Scanner& scan){
+void parse_conditional_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_conditional_expression\n");
     parse_logical_or_expression(scan);
     if (scan.current_state.lex == Lex::QuestionMark){
@@ -229,7 +229,7 @@ void parse_conditional_expression(Scanner& scan){
     }
 }
 
-void parse_assignment_expression(Scanner& scan){
+void parse_assignment_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_assignment_expression\n");
     scan.save_state();
     if (try_parse(parse_unary_expression, scan)){
@@ -246,7 +246,7 @@ void parse_assignment_expression(Scanner& scan){
     }
 }
 
-void parse_assigment_operator(Scanner& scan){
+void parse_assigment_operator(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_assigment_operator\n");
     std::vector<Lex> ops = {Lex::Assigment, Lex::AssigmentMultiply, Lex::AssigmentDivide, Lex::AssigmentMod,
         Lex::AssigmentPlus, Lex::AssigmentMinus, Lex::AssigmentLeftShift, Lex::AssigmentRightShift, Lex::AssigmentAnd,
@@ -258,7 +258,7 @@ void parse_assigment_operator(Scanner& scan){
     }
 }
 
-void parse_expression(Scanner& scan){
+void parse_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_expression\n");
     parse_assignment_expression(scan);
     while (scan.current_state.lex == Lex::Comma){
@@ -267,7 +267,7 @@ void parse_expression(Scanner& scan){
     }
 }
 
-void parse_constant_expression(Scanner& scan){
+void parse_constant_expression(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_constant_expression\n");
     parse_conditional_expression(scan);
 }
