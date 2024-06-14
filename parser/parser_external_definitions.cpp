@@ -8,13 +8,9 @@
 
 void parse_translation_unit(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_translation_unit\n");
-    ast->left = ast_manager.get_new_ast_instance();
-    parse_external_declaration(scan, ast->left);
+    parse_external_declaration(scan, ast);
     while (scan.current_state.lex != Lex::EOT){
-        AST *temp_ast = ast;
-        ast = ast_manager.get_new_ast_instance();
         parse_external_declaration(scan, ast);
-        ast->left = temp_ast;
     }
 }
 
@@ -29,16 +25,17 @@ void parse_external_declaration(Scanner& scan, AST*& ast){
 
 void parse_function_definition(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_function_definition\n");
-    parse_declaration_specifiers(scan);
-    parse_declarator(scan);
-    try_parse(parse_declaration_list, scan);
-    parse_compound_statement(scan);
+    parse_declaration_specifiers(scan, ast);
+    parse_declarator(scan, ast);
+    try_parse(parse_declaration_list, scan, ast);
+    parse_compound_statement(scan, ast);
 }
 
 void parse_declaration_list(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_declaration_list\n");
-    parse_declaration(scan);
-    while (try_parse(parse_declaration, scan)){
+    // вызывается только в parse_function_definition
+    parse_declaration(scan, ast);
+    while (try_parse(parse_declaration, scan, ast)){
         
     }
 }

@@ -5,9 +5,7 @@
 AST::AST()
     : left(nullptr),
     right(nullptr),
-    value(0),
-    type(AstNodeType::None),
-    operation(Operation::None)
+    value(0)
 {
     ast_manager.add_ast_node(this);
 }
@@ -26,23 +24,18 @@ void AST::save_state(){
     state.left = left;
     state.right = right;
     state.value = value;
-    state.type = type;
-    state.operation = operation;
+    states.push(state);
 }
 
 void AST::load_state(){
     if (states.size() == 0){
         return;
     }
-    delete left;
-    delete right;
     AstState state = states.top();
     states.pop();
     left = state.left;
     right = state.right;
     value = state.value;
-    type = state.type;
-    operation = state.operation;
 }
 
 
@@ -81,3 +74,5 @@ void AstManager::delete_all_nodes(){
         delete ast_ptr;
     }
 }
+
+AstManager ast_manager;

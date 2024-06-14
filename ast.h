@@ -3,54 +3,26 @@
 #include "scanner.h"
 #include <stack>
 
-enum class AstNodeType{
-    Int,
-    Float,
-    String,
-    Char,
-    Variable,
-    Pointer,
-    Struct,
-    Function,
-    Operation,
-    None,
-};
-
 enum class Operation{
     Plus,
     Minus,
-    UnaryPlus,
-    UnaryMinus,
-    PostfixIncrement,
-    PostfixDecrement,
-    PrefixIncrement,
-    PrefixDecrement,
-    PointerDereference,
-    FunctionCall,
-    None
+    Multiply,
+    Divide,
+    DebugPrint
 };
+
+using AstNodeValue = std::variant<
+    Operation,
+    int
+>;
+
+class AST;
 
 struct AstState{
     AST *left;
     AST *right;
-    LexerValue value;
-    AstNodeType type;
-    Operation operation;
+    AstNodeValue value;
 };
-
-enum class CType{
-    Int,
-    Float,
-    String,
-    Char,
-    Pointer,
-};
-
-struct FunctionDescription{
-
-};
-
-using AstNodeValue = std::variant<std::string, char, int, float, FunctionDescription>;
 
 class AstManager;
 
@@ -63,9 +35,7 @@ public:
     void delete_state();
     AST *left;
     AST *right;
-    LexerValue value;
-    AstNodeType type;
-    Operation operation;
+    AstNodeValue value;
 private:
     AST();
     std::stack<AstState> states;
@@ -85,4 +55,4 @@ private:
     std::vector<AST*> ast_pointer_list;
 };
 
-static AstManager ast_manager;
+extern AstManager ast_manager;

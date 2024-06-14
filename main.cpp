@@ -4,15 +4,17 @@
 #include <cstdio>
 #include "parser/parser.h"
 #include <sstream>
+#include "codegen.h"
 
 int main(){
     
-    std::string file_name("c-code-files/sample.c");
+    std::string file_name("c-code-files/sample_for_gen.c");
     std::ifstream fin(file_name);
     std::stringstream buffer;
     buffer << fin.rdbuf();
     try{
-        parse(buffer.str());
+        AST* headAstNode = parse(buffer.str());
+        generate_native_code(headAstNode);
         std::cout << "\n\n";
         std::cout << "#######################\n";
         std::cout << "####### УСПЕШНО #######\n";
@@ -24,5 +26,5 @@ int main(){
     } catch (std::exception e){
         std::cout << "неизвестная ошибка парсинга\n";
     }
-    
+    ast_manager.delete_all_nodes();
 }

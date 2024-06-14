@@ -24,10 +24,12 @@ name_table.o: name_table.cpp name_table.h
 	g++ name_table.cpp -c
 ast.o: ast.h ast.cpp
 	g++ ast.cpp -c
+codegen.o: codegen.h codegen.cpp
+	g++ codegen.cpp -c
 
 all: main.o scanner.o scan_wrapper.o converter.o parser/parser.o parser/parser_expressions.o \
 			parser/parser_declarations.o parser/parser_statements.o parser/parser_external_definitions.o \
-			name_table.o parser/try_parse.o parser/parser_others.o ast.o
+			name_table.o parser/try_parse.o parser/parser_others.o ast.o codegen.o
 	g++ main.o \
 		scanner.o \
 		scan_wrapper.o \
@@ -41,6 +43,7 @@ all: main.o scanner.o scan_wrapper.o converter.o parser/parser.o parser/parser_e
 		parser/try_parse.o \
 		parser/parser_others.o \
 		ast.o \
+		codegen.o \
 		-o app
 clean:
 	rm  app \
@@ -57,4 +60,6 @@ clean:
 		parser/try_parse.o \
 		parser/parser_others.o \
 		ast.o \
+		codegen.o \
+		
 

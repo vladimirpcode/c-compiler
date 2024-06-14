@@ -15,6 +15,9 @@ void parse_constant(Scanner& scan, AST*& ast){
         || scan.current_state.lex == Lex::CharLiteral
         || scan.current_state.lex == Lex::EnumConstant)
     {
+        if (scan.current_state.lex == Lex::IntLiteral){
+            ast->value = std::get<int>(scan.current_state.value);
+        }
         scan.get_next();
     } else {
         throw ExpectedLexException("константа", scan.get_line_for_compiler_msg());
@@ -23,5 +26,5 @@ void parse_constant(Scanner& scan, AST*& ast){
 
 void parse_enumeration_constant(Scanner& scan, AST*& ast){
     DEBUG_PRINT("parse_enumeration_constant\n");
-    parse_identifier(scan);
+    parse_identifier(scan, ast);
 }

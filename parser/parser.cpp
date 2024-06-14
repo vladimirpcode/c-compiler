@@ -25,12 +25,12 @@ void check(Scanner& scan, Lex lex){
     }
 }
 
-void parse(const std::string& translation_unit_text){
+AST* parse(const std::string& translation_unit_text){
     Scanner scan(translation_unit_text);
     // глобальная область видимость
     name_table.current_state.entries.clear(); //ToDo отрефакторить, определить где лежать таблице имен
     name_table.open_scope();
     AST *ast = ast_manager.get_new_ast_instance();
     parse_translation_unit(scan, ast);
-    ast_manager.delete_all_nodes();
+    return ast;
 }
