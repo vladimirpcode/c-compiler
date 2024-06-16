@@ -3,13 +3,13 @@
 #include "parser.h"
 #include <iostream>
 
-void parse_identifier(Scanner& scan, AST*& ast){
-    DEBUG_PRINT("parse_identifier\n");
+void parse_identifier(Scanner& scan, AST*& ast, int depth){
+    DEBUG_PRINT(depth, "parse_identifier\n");
     check(scan, Lex::Ident);
 }
 
-void parse_constant(Scanner& scan, AST*& ast){
-    DEBUG_PRINT("parse_constant\n");
+void parse_constant(Scanner& scan, AST*& ast, int depth){
+    DEBUG_PRINT(depth, "parse_constant\n");
     if (scan.current_state.lex == Lex::IntLiteral
         || scan.current_state.lex == Lex::FloatLiteral
         || scan.current_state.lex == Lex::CharLiteral
@@ -24,7 +24,7 @@ void parse_constant(Scanner& scan, AST*& ast){
     }
 }
 
-void parse_enumeration_constant(Scanner& scan, AST*& ast){
-    DEBUG_PRINT("parse_enumeration_constant\n");
-    parse_identifier(scan, ast);
+void parse_enumeration_constant(Scanner& scan, AST*& ast, int depth){
+    DEBUG_PRINT(depth, "parse_enumeration_constant\n");
+    parse_identifier(scan, ast, depth + 1);
 }

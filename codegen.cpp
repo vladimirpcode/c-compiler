@@ -16,6 +16,7 @@ std::string ast_to_str(AST* node){
             case Operation::Minus: return "-"s;
             case Operation::Plus: return "+"s;
             case Operation::Multiply: return "*"s;
+            default: return "undefined"s;
         }
     } catch (std::exception e){}
     return "error"s;
@@ -35,5 +36,6 @@ void print_ast(AST* head, int n){
 }
 
 void generate_native_code(AST* headAstNode){
+    std::cout << "====================================\n";
     print_ast(headAstNode, 0);
 }

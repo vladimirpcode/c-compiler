@@ -18,35 +18,6 @@ AST::~AST(){
     ast_manager.remove_ast_node_from_list(this);
 }
 
-
-void AST::save_state(){
-    AstState state;
-    state.left = left;
-    state.right = right;
-    state.value = value;
-    states.push(state);
-}
-
-void AST::load_state(){
-    if (states.size() == 0){
-        return;
-    }
-    AstState state = states.top();
-    states.pop();
-    left = state.left;
-    right = state.right;
-    value = state.value;
-}
-
-
-void AST::delete_state(){
-    if (states.size() == 0){
-        return;
-    }
-    states.pop();
-}
-
-
 AST* AstManager::get_new_ast_instance(){
     return new AST();
 }

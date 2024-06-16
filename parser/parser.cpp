@@ -31,6 +31,15 @@ AST* parse(const std::string& translation_unit_text){
     name_table.current_state.entries.clear(); //ToDo отрефакторить, определить где лежать таблице имен
     name_table.open_scope();
     AST *ast = ast_manager.get_new_ast_instance();
-    parse_translation_unit(scan, ast);
+    parse_translation_unit(scan, ast, 0);
     return ast;
+}
+
+
+void dbg_print(int n, const char* s){
+    std::string whitespaces = ""s;
+    for (int i = 0; i < n; ++i){
+        whitespaces += " ";
+    }
+    std::cout << whitespaces << s << "\n";
 }

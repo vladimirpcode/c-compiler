@@ -30,9 +30,11 @@ public:
     LexerValue value;
 };
 
+void dbg_print(int n, const char* s);
+
 #define DEBUG
 #ifdef DEBUG
-#define DEBUG_PRINT(s) (printf(s))
+#define DEBUG_PRINT(n, s) (dbg_print(n, s))
 #else 
 #define DEBUG_PRINT(s)
 #endif

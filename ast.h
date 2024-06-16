@@ -16,13 +16,6 @@ using AstNodeValue = std::variant<
     int
 >;
 
-class AST;
-
-struct AstState{
-    AST *left;
-    AST *right;
-    AstNodeValue value;
-};
 
 class AstManager;
 
@@ -30,15 +23,11 @@ class AST{
     friend class AstManager;
 public:
     ~AST();
-    void save_state();
-    void load_state();
-    void delete_state();
     AST *left;
     AST *right;
     AstNodeValue value;
 private:
     AST();
-    std::stack<AstState> states;
 };
 
 // не уверен, что откат состояний с удалением ветвей будет безболезненным
