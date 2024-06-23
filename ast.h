@@ -37,8 +37,6 @@ class AstManager{
 public:
     AST* get_new_ast_instance();
     friend AST::AST();
-    void add_ast_node(AST* ast_pointer);
-    void remove_ast_node_from_list(AST* ast_pointer);
     void delete_all_nodes();
 private:
     std::vector<AST*> ast_pointer_list;

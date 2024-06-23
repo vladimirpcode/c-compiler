@@ -14,6 +14,7 @@ int main(){
     buffer << fin.rdbuf();
     try{
         AST* headAstNode = parse(buffer.str());
+        debug_ast_print(headAstNode);
         generate_native_code(headAstNode);
         std::cout << "\n\n";
         std::cout << "#######################\n";
