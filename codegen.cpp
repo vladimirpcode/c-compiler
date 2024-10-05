@@ -46,6 +46,35 @@ enum class GenCodeSide{
     Right
 };
 
+std::string gen_code_for_int_value(AST* ast, GenCodeSide side){
+    int int_value = std::get<int>(ast->value);
+    std::string register_name;
+    if (side == GenCodeSide::Left){
+        register_name = "rax"s;
+    } else {
+        register_name = "rbx"s;
+    }
+    return "\tmov "s + register_name + ", "s + std::to_string(int_value) + "\n"s;
+}
+
+std::string gen_code_for_operation(AST* ast, GenCodeSide side){
+    Operation operation = std::get<Operation>(ast->value);
+    if (operation == Operation::Plus){
+        std::string command = "\tadd rax, rbx\n"s;
+        if (side == GenCodeSide::Right){
+            command += "\tmov rbx, rax\n"s;
+        }
+        return command;
+    }
+    if (operation == Operation::Minus){
+        std::string command = "\tsub rax, rbx\n"s;
+        if (side == GenCodeSide::Right){
+            command += "\tmov rbx, rax\n"s;
+        }
+        return command;
+    }
+}
+
 std::string gen_code_for_ast(AST* ast, GenCodeSide side){
     if (!ast){
         return ""s;
@@ -53,49 +82,32 @@ std::string gen_code_for_ast(AST* ast, GenCodeSide side){
     std::string result = ""s;
     result += gen_code_for_ast(ast->left, GenCodeSide::Left);
     result += gen_code_for_ast(ast->right, GenCodeSide::Right);
-    try{
-        int int_value = std::get<int>(ast->value);
-        std::string register_name;
-        if (side == GenCodeSide::Left){
-            register_name = "%rax"s;
-        } else {
-            register_name = "%rbx"s;
-        }
-        return result + "\tmovq $"s + std::to_string(int_value) + ", "s + register_name + "\n"s;
-    } catch (std::exception e){}
-    try{
-        Operation operation = std::get<Operation>(ast->value);
-        if (operation == Operation::Plus){
-            std::string command = "\taddq %rbx, %rax\n"s;
-            if (side == GenCodeSide::Right){
-                command += "\tmovq %rax, %rbx\n"s;
-            }
-            return result + command;
-        }
-        if (operation == Operation::Minus){
-            std::string command = "\tsubq %rbx, %rax\n"s;
-            if (side == GenCodeSide::Right){
-                command += "\tmovq %rax, %rbx\n"s;
-            }
-            return result + command;
-        }
-        
-    } catch (std::exception e) {}
+    if (std::get_if<int>(&(ast->value))){
+        result += gen_code_for_int_value(ast, side);
+    } else if (std::get_if<Operation>(&(ast->value))){
+        result += gen_code_for_operation(ast, side);
+    }
+    return result;
 }
 
 void generate_native_code(AST* headAstNode){
-    std::string asm_file_text = ".global _start\n_start:\n";
+    std::string asm_file_text = "extern printf\n";
+    asm_file_text += "section .data\n\tresult_msg db \"result = %d\",10\n";
+    asm_file_text += "section .text\n\tglobal main\nmain:\n";
+    asm_file_text += "\tpush rbp\n\tmov rbp, rsp\n";
     asm_file_text += gen_code_for_ast(headAstNode, GenCodeSide::Left);
-    asm_file_text += "\tmovq %rax, %rdi\n";
-    asm_file_text += "\tmovq $60, %rax\n";
-    asm_file_text += "\tsyscall\n";
+    asm_file_text += "\tmov rsi, rax\n";
+    asm_file_text += "\tmov rdi, result_msg\n";
+    asm_file_text += "\tmov rax, 0\n";
+    asm_file_text += "\tcall printf\n";
+    asm_file_text += "\tleave\n\tret\n\n";
     std::ofstream fout;
     fout.open("program.asm");
     if (fout.is_open()){
         fout << asm_file_text;
     }
     fout.close();
-    system("as program.asm -o program.o");
-    system("ld program.o -o program");
+    system("nasm -f elf64 -g -F dwarf program.asm");
+    system("gcc -o generated_program program.o");
 
 }
